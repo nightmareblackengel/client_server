@@ -19,9 +19,10 @@ sockaddr_in getConfiguredAddress() {
     return address;
 }
 
-const int ERROR_CANT_CREATE_SOCKET      = -1;
-const int ERROR_CANT_BIND_SOCKET        = -2;
-const int ERROR_CANT_START_LISTEN       = -3;
+const int DEFAULT_INVALID_DESCRIPTOR    = -1;
+const int ERROR_CANT_CREATE_SOCKET      = -2;
+const int ERROR_CANT_BIND_SOCKET        = -3;
+const int ERROR_CANT_START_LISTEN       = -4;
 
 class Server01
 {
@@ -30,7 +31,7 @@ private:
 public:
     Server01()
     {
-        this->fileDescription = 0;
+        this->fileDescription = DEFAULT_INVALID_DESCRIPTOR;
     }
     ~Server01()
     {
@@ -78,9 +79,13 @@ public:
 
     int closeFd()
     {
+        if (this->fileDescription == DEFAULT_INVALID_DESCRIPTOR) {
+            return 0;
+        }
+
         int closeRes = close(this->fileDescription);
         if (closeRes == 0) {
-            this->fileDescription = 0;
+            this->fileDescription = DEFAULT_INVALID_DESCRIPTOR;
             cout << "Сервер остановлен." << endl;
         } else {
             cout << "CloseRes = " << closeRes << endl;
