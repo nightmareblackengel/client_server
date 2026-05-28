@@ -23,6 +23,9 @@ const int DEFAULT_INVALID_DESCRIPTOR    = -1;
 const int ERROR_CANT_CREATE_SOCKET      = -2;
 const int ERROR_CANT_BIND_SOCKET        = -3;
 const int ERROR_CANT_START_LISTEN       = -4;
+const int ERROR_CLIENT_CANT_ACCEPT      = -5;
+const int ERROR_WHEN_CLIENT_READ        = -6;
+const int ERROR_CLIENT_DISCONNECT       = -7;
 
 class Server01
 {
@@ -77,6 +80,60 @@ public:
         return listenRes;
     }
 
+    int acceptNewClient()
+    {
+        sockaddr_in clientAddr{};
+        socklen_t clientAddrLen = sizeof(clientAddr);
+
+        cout << "Ожидание входящего подключения (accept)..." << endl;
+        // accept блокирует поток, пока кто-то не подключится
+        int clientFd = accept(this->fileDescription, (struct sockaddr*)&clientAddr, &clientAddrLen);
+        if (clientFd < 0) {
+            perror("Не удалось принять подключение (accept)");
+            return ERROR_CLIENT_CANT_ACCEPT;
+        }
+        cout << "Клиент успешно подключился! Дескриптор клиента: " << clientFd << endl;
+
+        return clientFd;
+    }
+
+    int readFromClient(int clientId)
+    {
+        // Буфер для чтения данных (1 КБ)
+        char buff[65535] = {0};
+
+        // recv() читает данные из сокета клиента.
+        // Он тоже блокирующий: ждет, пока клиент что-то пришлет.
+        ssize_t bytesRead = recv(clientId, buff, sizeof(buff) - 1, 0);
+        if (bytesRead < 0) {
+            perror("Ошибка при чтении данных (recv)");
+            // Закрываем сокет клиента после общения
+            close(clientId);
+            cout << "Соединение с клиентом закрыто." << endl;
+
+            return ERROR_WHEN_CLIENT_READ;
+        }
+        if (bytesRead == 0) {
+            cout << "Клиент отключился до отправки данных." << endl;
+            // Закрываем сокет клиента после общения
+            close(clientId);
+            cout << "Соединение с клиентом закрыто." << endl;
+
+            return ERROR_CLIENT_DISCONNECT;
+        }
+        ///
+        buff[bytesRead] = '\0';
+        cout << "Получено от клиента (" << bytesRead << " байт):" << endl;
+        cout << "----------------------------------------" << endl;
+        cout << buff << endl;
+        cout << "----------------------------------------" << endl;
+
+        // Закрываем сокет клиента после общения
+        close(clientId);
+        cout << "Соединение с клиентом закрыто." << endl;
+        return 0;
+    }
+
     int closeFd()
     {
         if (this->fileDescription == DEFAULT_INVALID_DESCRIPTOR) {
@@ -110,11 +167,12 @@ public:
             return ERROR_CANT_START_LISTEN;
         }
 
-        std::cout << "Сервер успешно запущен и слушает порт " << SERVER_PORT << "..." << endl;
-        std::cout << "У вас есть 15 секунд, чтобы проверить его статус в терминале." << endl;
+        int clientId = srv.acceptNewClient();
+        if (clientId < 0) {
+            return ERROR_CLIENT_CANT_ACCEPT;
+        }
 
-        // Временно усыпляем процесс на 15 секунд, чтобы он не закрылся сразу
-        sleep(5);
+        srv.readFromClient(clientId);
 
         return 0;
     }
