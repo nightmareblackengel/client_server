@@ -2,10 +2,12 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <map>
 
 using std::perror;
 using std::cout;
 using std::endl;
+using std::map;
 
 const int SERVER_PORT       = 8899;
 const int SERVER_IP_TYPE    = AF_INET;
@@ -27,10 +29,76 @@ const int ERROR_CLIENT_CANT_ACCEPT      = -5;
 const int ERROR_WHEN_CLIENT_READ        = -6;
 const int ERROR_CLIENT_DISCONNECT       = -7;
 
+class Client01
+{
+private:
+    int fileDescription;
+    sockaddr_in addr{};
+    socklen_t   addrLen{};
+public:
+    Client01()
+    {
+        this->fileDescription = DEFAULT_INVALID_DESCRIPTOR;
+        this->addrLen = sizeof(this->addr);
+    }
+    // 1. ЗАПРЕЩАЕМ копирование (чтобы случайно не скопировать сокет)
+    Client01(const Client01&) = delete;
+    Client01& operator=(const Client01&) = delete;
+
+    // 2. РАЗРЕШАЕМ перемещение (Конструктор перемещения)
+    Client01(Client01&& other) noexcept {
+        this->fileDescription = other.fileDescription;
+        other.fileDescription = DEFAULT_INVALID_DESCRIPTOR;
+    }
+
+    // 3. Оператор присваивания перемещением
+    Client01& operator=(Client01&& other) noexcept {
+        if (this != &other) {
+            this->fileDescription = other.fileDescription;
+            other.fileDescription = DEFAULT_INVALID_DESCRIPTOR;
+        }
+
+        return *this;
+    }
+
+    ~Client01()
+    {
+        this->closeFd();
+    }
+
+    int connectToServer(int serverFd)
+    {
+        // accept блокирует поток, пока кто-то не подключится
+        this->fileDescription = accept(serverFd, (struct sockaddr*)&(this->addr), &(this->addrLen));
+        if (this->fileDescription < 0) {
+            perror("Client. Не удалось принять подключение (accept)");
+            return ERROR_CLIENT_CANT_ACCEPT;
+        }
+        cout << "Клиент успешно подключился! Дескриптор клиента: " << this->fileDescription << endl;
+        return this->fileDescription;
+    }
+
+    int closeFd()
+    {
+        // Закрываем сокет клиента после общения
+        if (this->fileDescription == DEFAULT_INVALID_DESCRIPTOR) {
+            return 0;
+        }
+        int closeRes = close(this->fileDescription);
+        if (closeRes != 0) {
+            cout << "Client Error CloseRes = " << closeRes << endl;
+        }
+        this->fileDescription = DEFAULT_INVALID_DESCRIPTOR;
+
+        return closeRes;
+    }
+};
+
 class Server01
 {
 private:
     int fileDescription;
+    map<int, Client01> clientList;
 public:
     Server01()
     {
@@ -82,19 +150,15 @@ public:
 
     int acceptNewClient()
     {
-        sockaddr_in clientAddr{};
-        socklen_t clientAddrLen = sizeof(clientAddr);
+        Client01 c1;
 
         cout << "Ожидание входящего подключения (accept)..." << endl;
-        // accept блокирует поток, пока кто-то не подключится
-        int clientFd = accept(this->fileDescription, (struct sockaddr*)&clientAddr, &clientAddrLen);
-        if (clientFd < 0) {
-            perror("Не удалось принять подключение (accept)");
-            return ERROR_CLIENT_CANT_ACCEPT;
+        int clientId = c1.connectToServer(this->fileDescription);
+        if (clientId >= 0) {
+            this->clientList[clientId] = std::move(c1);
         }
-        cout << "Клиент успешно подключился! Дескриптор клиента: " << clientFd << endl;
 
-        return clientFd;
+        return clientId;
     }
 
     int readFromClient(int clientId)
@@ -107,18 +171,10 @@ public:
         ssize_t bytesRead = recv(clientId, buff, sizeof(buff) - 1, 0);
         if (bytesRead < 0) {
             perror("Ошибка при чтении данных (recv)");
-            // Закрываем сокет клиента после общения
-            close(clientId);
-            cout << "Соединение с клиентом закрыто." << endl;
-
             return ERROR_WHEN_CLIENT_READ;
         }
         if (bytesRead == 0) {
             cout << "Клиент отключился до отправки данных." << endl;
-            // Закрываем сокет клиента после общения
-            close(clientId);
-            cout << "Соединение с клиентом закрыто." << endl;
-
             return ERROR_CLIENT_DISCONNECT;
         }
         ///
@@ -128,9 +184,6 @@ public:
         cout << buff << endl;
         cout << "----------------------------------------" << endl;
 
-        // Закрываем сокет клиента после общения
-        close(clientId);
-        cout << "Соединение с клиентом закрыто." << endl;
         return 0;
     }
 
@@ -142,11 +195,12 @@ public:
 
         int closeRes = close(this->fileDescription);
         if (closeRes == 0) {
-            this->fileDescription = DEFAULT_INVALID_DESCRIPTOR;
             cout << "Сервер остановлен." << endl;
         } else {
-            cout << "CloseRes = " << closeRes << endl;
+            cout << "Сервер CloseRes = " << closeRes << endl;
         }
+        this->fileDescription = DEFAULT_INVALID_DESCRIPTOR;
+        cout << "Соединение с клиентом закрыто." << endl;
 
         return closeRes;
     }
