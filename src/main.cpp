@@ -54,6 +54,8 @@ public:
     // 3. Оператор присваивания перемещением
     Client01& operator=(Client01&& other) noexcept {
         if (this != &other) {
+            // Закрываем свой сокет, если он был открыт
+            this->closeFd();
             this->fileDescription = other.fileDescription;
             other.fileDescription = DEFAULT_INVALID_DESCRIPTOR;
         }
