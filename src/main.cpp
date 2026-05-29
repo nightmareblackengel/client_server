@@ -3,11 +3,13 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <map>
+#include <vector>
 
 using std::perror;
 using std::cout;
 using std::endl;
 using std::map;
+using std::vector;
 
 const int SERVER_PORT       = 8899;
 const int SERVER_IP_TYPE    = AF_INET;
@@ -44,24 +46,10 @@ public:
     // 1. ЗАПРЕЩАЕМ копирование (чтобы случайно не скопировать сокет)
     Client01(const Client01&) = delete;
     Client01& operator=(const Client01&) = delete;
-
     // 2. РАЗРЕШАЕМ перемещение (Конструктор перемещения)
-    Client01(Client01&& other) noexcept {
-        this->fileDescription = other.fileDescription;
-        other.fileDescription = DEFAULT_INVALID_DESCRIPTOR;
-    }
-
+    Client01(Client01&& other) = delete;
     // 3. Оператор присваивания перемещением
-    Client01& operator=(Client01&& other) noexcept {
-        if (this != &other) {
-            // Закрываем свой сокет, если он был открыт
-            this->closeFd();
-            this->fileDescription = other.fileDescription;
-            other.fileDescription = DEFAULT_INVALID_DESCRIPTOR;
-        }
-
-        return *this;
-    }
+    Client01& operator=(Client01&& other) = delete;
 
     ~Client01()
     {
@@ -100,7 +88,7 @@ class Server01
 {
 private:
     int fileDescription;
-    map<int, Client01> clientList;
+    map<int, Client01*> clientList;
 public:
     Server01()
     {
@@ -109,6 +97,13 @@ public:
     ~Server01()
     {
         this->closeFd();
+        // & -> used for set nullptr to clientLIst item
+        for (auto &item: this->clientList) {
+            if (item.second != nullptr) {
+                delete item.second;
+                item.second = nullptr;
+            }
+        }
     }
 
     int createSocket()
@@ -152,12 +147,15 @@ public:
 
     int acceptNewClient()
     {
-        Client01 c1;
+        Client01 *c1 = new Client01();
 
         cout << "Ожидание входящего подключения (accept)..." << endl;
-        int clientId = c1.connectToServer(this->fileDescription);
+        int clientId = c1->connectToServer(this->fileDescription);
         if (clientId >= 0) {
-            this->clientList[clientId] = std::move(c1);
+            this->clientList[clientId] = c1;
+        } else {
+            delete c1;
+            c1 = nullptr;
         }
 
         return clientId;
@@ -165,12 +163,11 @@ public:
 
     int readFromClient(int clientId)
     {
-        // Буфер для чтения данных (1 КБ)
-        char buff[65535] = {0};
+        vector<char> buff(65536);
 
         // recv() читает данные из сокета клиента.
         // Он тоже блокирующий: ждет, пока клиент что-то пришлет.
-        ssize_t bytesRead = recv(clientId, buff, sizeof(buff) - 1, 0);
+        ssize_t bytesRead = recv(clientId, buff.data(), buff.size() - 1, 0);
         if (bytesRead < 0) {
             perror("Ошибка при чтении данных (recv)");
             return ERROR_WHEN_CLIENT_READ;
@@ -180,10 +177,11 @@ public:
             return ERROR_CLIENT_DISCONNECT;
         }
         ///
-        buff[bytesRead] = '\0';
+        std::string s1 (buff.data(), bytesRead);
+
         cout << "Получено от клиента (" << bytesRead << " байт):" << endl;
         cout << "----------------------------------------" << endl;
-        cout << buff << endl;
+        cout << s1 << endl;
         cout << "----------------------------------------" << endl;
 
         return 0;
