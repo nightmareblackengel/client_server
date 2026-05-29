@@ -179,8 +179,7 @@ public:
         ///
         std::string s1 (buff.data(), bytesRead);
 
-        cout << "Получено от клиента (" << bytesRead << " байт):" << endl;
-        cout << "----------------------------------------" << endl;
+        cout << "Получено от клиента [" << clientId << "](" << bytesRead << " байт):" << endl;
         cout << s1 << endl;
         cout << "----------------------------------------" << endl;
 
@@ -205,6 +204,12 @@ public:
         return closeRes;
     }
 
+    void removeClient(int clientId)
+    {
+        delete this->clientList[clientId];
+        this->clientList.erase(clientId);
+    }
+
     static int runServer01() {
         Server01 srv;
         if (srv.createSocket() < 0) {
@@ -221,12 +226,25 @@ public:
             return ERROR_CANT_START_LISTEN;
         }
 
-        int clientId = srv.acceptNewClient();
-        if (clientId < 0) {
-            return ERROR_CLIENT_CANT_ACCEPT;
-        }
+        // todo: this server used in Debian with systemd
+        bool isServerRun = true;
 
-        srv.readFromClient(clientId);
+        while (isServerRun) {
+
+            int clientId = srv.acceptNewClient();
+            if (clientId < 0) {
+                return ERROR_CLIENT_CANT_ACCEPT;
+            }
+
+            int readRes = 0;
+            while (readRes == 0) {
+                cout << "readRes = " << readRes << endl;
+                readRes = srv.readFromClient(clientId);
+            }
+            cout << "start removing client [" << clientId << "]" << endl;
+            srv.removeClient(clientId);
+            cout << "client [" << clientId << "] removed" << endl;
+        }
 
         return 0;
     }
