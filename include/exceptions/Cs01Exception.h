@@ -5,9 +5,12 @@
 
 using std::string;
 
+const string CS01_CLIENT_TYPE = "Client";
+const string CS01_SERVER_TYPE = "Server";
+
 class Cs01Exception: public std::exception
 {
-private:
+protected:
     string type;
     string errorMsg;
     string className;
@@ -38,10 +41,30 @@ public:
 
     string toString()
     {
-        return "Msg: [" + this->errorMsg + "]. Type: [" + this->type + "]. "
+        return " " + this->errorMsg + ". Type: [" + this->type + "]. "
                + "Class: [" + this->className + "]."
             //+ " Method: [" + this->methodName + "]."
                 ;
+    }
+};
+
+class Cs01ClientException: public Cs01Exception
+{
+public:
+    Cs01ClientException(string errMsg):
+            Cs01Exception(errMsg, CS01_CLIENT_TYPE, __func__ )
+    {
+
+    }
+};
+
+class Cs01ServerException: public Cs01Exception
+{
+public:
+    Cs01ServerException(string errMsg):
+            Cs01Exception(errMsg, CS01_CLIENT_TYPE, __func__ )
+    {
+
     }
 };
 
