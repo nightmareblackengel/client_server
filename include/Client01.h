@@ -26,7 +26,6 @@ public:
 
     ~Client01()
     {
-        // TODO: : ~BaseTcpTransmitter()
     }
 
     static void run()

@@ -1,8 +1,12 @@
 #ifndef NBE_CHAT_SERVER_BASETCPTRANSMITTER_H
 #define NBE_CHAT_SERVER_BASETCPTRANSMITTER_H
 
+#include <iostream>
 #include <netinet/in.h>
 #include "bootstrap.h"
+
+using std::cout;
+using std::endl;
 
 class BaseTcpTransmitter
 {
