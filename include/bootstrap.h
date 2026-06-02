@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 
 const int SERVER_PORT       = 8899;
+const char* SERVER_HOST     = "127.0.0.1";
 const int SERVER_IP_TYPE    = AF_INET;
 
 sockaddr_in getConfiguredAddress() {
