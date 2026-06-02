@@ -17,12 +17,12 @@ using std::endl;
 class Server01
 {
 private:
-    int fileDescription;
+    int socketId;
     map<int, ServerClient01*> clientList;
 public:
     Server01()
     {
-        this->fileDescription = DEFAULT_INVALID_DESCRIPTOR;
+        this->socketId = DEFAULT_INVALID_DESCRIPTOR;
     }
     ~Server01()
     {
@@ -41,19 +41,19 @@ public:
         //  Создаем TCP-сокет
         // AF_INET - протокол IPv4
         // SOCK_STREAM - потоковый тип сокета (гарантирует доставку TCP)
-        this->fileDescription = socket(SERVER_IP_TYPE, SOCK_STREAM, 0);
-        if (this->fileDescription == -1) {
+        this->socketId = socket(SERVER_IP_TYPE, SOCK_STREAM, 0);
+        if (this->socketId == DEFAULT_INVALID_DESCRIPTOR) {
             perror("Не удалось создать сокет");
             return ERROR_CANT_CREATE_SOCKET;
         }
         cout << "удалось создать сокет" << endl;
-        return this->fileDescription;
+        return this->socketId;
     }
 
     int bindSocket(sockaddr_in &address)
     {
         // Привязываем сокет к адресу и порту (bind)
-        int bindRes = bind(this->fileDescription, (struct sockaddr*)&address, sizeof(address));
+        int bindRes = bind(this->socketId, (struct sockaddr*)&address, sizeof(address));
         if (bindRes < 0) {
             perror("Привязка сокета (bind) завершилась ошибкой");
             return ERROR_CANT_BIND_SOCKET;
@@ -66,7 +66,7 @@ public:
     {
         // 4. Переводим сокет в режим прослушивания (listen)
         // 10 - это размер очереди "недообработанных" подключений (backlog)
-        int listenRes = listen(this->fileDescription, requestSize);
+        int listenRes = listen(this->socketId, requestSize);
         if (listenRes < 0) {
             perror("Перевод сокета в режим listen завершился ошибкой");
             return ERROR_CANT_START_LISTEN;
@@ -80,7 +80,7 @@ public:
         ServerClient01 *c1 = new ServerClient01();
 
         cout << "Ожидание входящего подключения (accept)..." << endl;
-        int clientId = c1->connectToServer(this->fileDescription);
+        int clientId = c1->connectToServer(this->socketId);
         if (clientId >= 0) {
             this->clientList[clientId] = c1;
         } else {
@@ -118,17 +118,17 @@ public:
 
     int closeFd()
     {
-        if (this->fileDescription == DEFAULT_INVALID_DESCRIPTOR) {
+        if (this->socketId == DEFAULT_INVALID_DESCRIPTOR) {
             return 0;
         }
 
-        int closeRes = close(this->fileDescription);
+        int closeRes = close(this->socketId);
         if (closeRes == 0) {
             cout << "Сервер остановлен." << endl;
         } else {
             cout << "Сервер CloseRes = " << closeRes << endl;
         }
-        this->fileDescription = DEFAULT_INVALID_DESCRIPTOR;
+        this->socketId = DEFAULT_INVALID_DESCRIPTOR;
         cout << "Соединение с клиентом закрыто." << endl;
 
         return closeRes;

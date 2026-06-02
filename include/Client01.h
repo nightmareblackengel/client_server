@@ -17,10 +17,11 @@ using std::endl;
 class Client01
 {
 private:
-    int socketId = -1;
+    int socketId;
 public:
     Client01()
     {
+        this->socketId = DEFAULT_INVALID_DESCRIPTOR;
     }
 
     ~Client01()
