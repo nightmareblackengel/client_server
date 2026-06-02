@@ -24,29 +24,34 @@ public:
 
     ~BaseTcpTransmitter()
     {
-        if (this->socketId == DEFAULT_INVALID_DESCRIPTOR) {
-            return;
-        }
-
         this->closeSocket();
     }
 
     int closeSocket()
     {
-        close(this->socketId);
+        if (this->socketId == DEFAULT_INVALID_DESCRIPTOR) {
+            return 0;
+        }
+
+        int closeRes = close(this->socketId);
+        if (closeRes == 0) {
+            cout << "Сокет закрыт" << endl;
+        } else {
+            cout << "Сокет незакрыт. Код ошибки: " << closeRes << endl;
+        }
         this->socketId = DEFAULT_INVALID_DESCRIPTOR;
 
-        return 0;
+        return closeRes;
     }
 
     int createSocket()
     {
-        // AF_INET     - семейство адресов IPv4
-        // SOCK_STREAM - тип сокета, обеспечивающий надежную потоковую передачу (TCP)
+        //  Создаем TCP-сокет
+        // AF_INET - протокол IPv4
+        // SOCK_STREAM - потоковый тип сокета (гарантирует доставку TCP)
         // 0           - автоматический выбор протокола (для SOCK_STREAM это всегда TCP)
         this->socketId = socket(SERVER_IP_TYPE, SOCK_STREAM, 0);
         if (this->socketId == DEFAULT_INVALID_DESCRIPTOR) {
-            // throw "Some EXception";
             throw Cs01Exception("Не удалось создать сокет");
         }
 
@@ -63,6 +68,30 @@ public:
         }
 
         return 0;
+    }
+
+    int bindSocket()
+    {
+        sockaddr_in address = this->getConfiguredAddress();
+        // Привязываем сокет к адресу и порту (bind)
+        int bindRes = bind(this->socketId, (struct sockaddr*)&address, sizeof(address));
+        if (bindRes < 0) {
+            throw Cs01Exception("Привязка сокета (bind) завершилась ошибкой");
+        }
+
+        return bindRes;
+    }
+
+    int listenSocket(int requestSize = 10)
+    {
+        // Переводим сокет в режим прослушивания (listen)
+        // 10 - это размер очереди "недообработанных" подключений (backlog)
+        int listenRes = listen(this->socketId, requestSize);
+        if (listenRes < 0) {
+            throw Cs01Exception("Перевод сокета в режим listen завершился ошибкой");
+        }
+
+        return listenRes;
     }
 
     int getSocketId()
