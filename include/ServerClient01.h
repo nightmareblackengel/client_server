@@ -11,16 +11,17 @@ using std::cout;
 using std::endl;
 using std::perror;
 
+
 class ServerClient01
 {
 private:
-    int fileDescription;
+    int socketId;
     sockaddr_in addr{};
     socklen_t   addrLen{};
 public:
     ServerClient01()
     {
-        this->fileDescription = DEFAULT_INVALID_DESCRIPTOR;
+        this->socketId = DEFAULT_INVALID_DESCRIPTOR;
         this->addrLen = sizeof(this->addr);
     }
     // 1. ЗАПРЕЩАЕМ копирование (чтобы случайно не скопировать сокет)
@@ -39,26 +40,26 @@ public:
     int connectToServer(int serverFd)
     {
         // accept блокирует поток, пока кто-то не подключится
-        this->fileDescription = accept(serverFd, (struct sockaddr*)&(this->addr), &(this->addrLen));
-        if (this->fileDescription < 0) {
+        this->socketId = accept(serverFd, (struct sockaddr*)&(this->addr), &(this->addrLen));
+        if (this->socketId < 0) {
             perror("Client. Не удалось принять подключение (accept)");
-            return ERROR_CLIENT_CANT_ACCEPT;
+            return -22;
         }
-        cout << "Клиент успешно подключился! Дескриптор клиента: " << this->fileDescription << endl;
-        return this->fileDescription;
+        cout << "Клиент успешно подключился! Дескриптор клиента: " << this->socketId << endl;
+        return this->socketId;
     }
 
     int closeFd()
     {
         // Закрываем сокет клиента после общения
-        if (this->fileDescription == DEFAULT_INVALID_DESCRIPTOR) {
+        if (this->socketId == DEFAULT_INVALID_DESCRIPTOR) {
             return 0;
         }
-        int closeRes = close(this->fileDescription);
+        int closeRes = close(this->socketId);
         if (closeRes != 0) {
             cout << "Client Error CloseRes = " << closeRes << endl;
         }
-        this->fileDescription = DEFAULT_INVALID_DESCRIPTOR;
+        this->socketId = DEFAULT_INVALID_DESCRIPTOR;
 
         return closeRes;
     }
