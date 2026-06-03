@@ -15,6 +15,8 @@ const int SERVER_PORT       = 8899;
 
 class BaseTcpTransmitter: public ISocket
 {
+protected:
+    string errorType = "None";
 public:
     BaseTcpTransmitter():
             ISocket()
@@ -35,7 +37,7 @@ public:
         // 0           - автоматический выбор протокола (для SOCK_STREAM это всегда TCP)
         int socketId = socket(SERVER_IP_TYPE, SOCK_STREAM, 0);
         if (socketId == DEFAULT_INVALID_DESCRIPTOR) {
-            throw Cs01Exception("Не удалось создать сокет");
+            this->throwException("Не удалось создать сокет");
         }
         this->setSocketId(socketId);
 
@@ -48,7 +50,7 @@ public:
         sockaddr_in address = this->getConfiguredAddress();
 
         if (connect(this->getSocketId(), (struct sockaddr*) &address, sizeof(address)) == -1) {
-            throw Cs01Exception("Не удалось подключиться к серверу");
+            this->throwException("Не удалось подключиться к серверу");
         }
 
         return 0;
@@ -87,10 +89,15 @@ public:
 
         // Преобразуем строковый IP "127.0.0.1"(SERVER_HOST) в бинарный формат и записываем в структуру
         if (inet_pton(SERVER_IP_TYPE, SERVER_HOST, &address.sin_addr) <= 0) {
-            throw "Неверный IP-адрес или адрес не поддерживается";
+            this->throwException("Неверный IP-адрес или адрес не поддерживается");
         }
 
         return address;
+    }
+
+    void throwException(const string &msg)
+    {
+        throw Cs01Exception(msg, this->errorType);
     }
 };
 

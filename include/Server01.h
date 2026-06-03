@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <chrono>
 #include "bootstrap.h"
 #include "ServerClient01.h"
 #include "Cs01Exception.h"
@@ -22,7 +23,7 @@ private:
 public:
     Server01(): BaseTcpTransmitter()
     {
-
+        this->errorType = CS01_SERVER_TYPE;
     }
     ~Server01()
     {
@@ -47,7 +48,7 @@ public:
         } catch(Cs01Exception &ex1) {
             delete c1;
             c1 = nullptr;
-            throw Cs01Exception("Не получилось присоединить клиента");
+            this->throwException("Не получилось присоединить клиента");
         }
 
         return clientId;
@@ -61,10 +62,10 @@ public:
         // Он тоже блокирующий: ждет, пока клиент что-то пришлет.
         ssize_t bytesRead = recv(clientId, buff.data(), buff.size() - 1, 0);
         if (bytesRead < 0) {
-            throw Cs01ServerException("Ошибка при чтении данных (recv)");
+            this->throwException("Ошибка при чтении данных (recv)");
         }
         if (bytesRead == 0) {
-            throw Cs01ServerException("Клиент отключился до отправки данных.");
+            this->throwException("Клиент отключился до отправки данных.");
         }
 
         std::string s1 (buff.data(), bytesRead);
@@ -95,6 +96,7 @@ public:
 
             while (isServerRun) {
                 int clientId = srv.acceptNewClient();
+                auto clientConnectStartAt = std::chrono::steady_clock::now();
                 // TODO:
                 int readRes = 0;
                 while (readRes == 0) {
@@ -106,7 +108,10 @@ public:
                         readRes = -1;
                     }
                 }
-                cout << "start removing client [" << clientId << "]" << endl;
+                auto clientConnectEndAt = std::chrono::steady_clock::now();
+
+                cout << "start removing client [" << clientId << "]. Timeout = ["
+                    << std::chrono::duration_cast<std::chrono::milliseconds>(clientConnectEndAt - clientConnectStartAt) << "]" << endl;
                 srv.removeClient(clientId);
                 cout << "client [" << clientId << "] removed" << endl;
             }

@@ -20,7 +20,7 @@ class Client01: public BaseTcpTransmitter
 public:
     Client01(): BaseTcpTransmitter()
     {
-
+        this->errorType = CS01_CLIENT_TYPE;
     }
 
     ~Client01()

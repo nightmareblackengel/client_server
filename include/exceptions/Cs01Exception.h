@@ -48,24 +48,4 @@ public:
     }
 };
 
-class Cs01ClientException: public Cs01Exception
-{
-public:
-    Cs01ClientException(string errMsg):
-            Cs01Exception(errMsg, CS01_CLIENT_TYPE, __func__ )
-    {
-
-    }
-};
-
-class Cs01ServerException: public Cs01Exception
-{
-public:
-    Cs01ServerException(string errMsg):
-            Cs01Exception(errMsg, CS01_CLIENT_TYPE, __func__ )
-    {
-
-    }
-};
-
 #endif //NBE_CHAT_SERVER_CS01EXCEPTION_H
