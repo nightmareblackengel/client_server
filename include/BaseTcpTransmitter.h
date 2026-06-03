@@ -4,7 +4,7 @@
 #include <iostream>
 #include <netinet/in.h>
 #include "bootstrap.h"
-#include "IResource.h"
+#include "ISocket.h"
 
 using std::cout;
 using std::endl;
@@ -12,11 +12,11 @@ using std::endl;
 const char* SERVER_HOST     = "127.0.0.1";
 const int SERVER_PORT       = 8899;
 
-class BaseTcpTransmitter: public IResource
+class BaseTcpTransmitter: public ISocket
 {
 public:
     BaseTcpTransmitter():
-        IResource()
+            ISocket()
     {
 
     }
@@ -24,15 +24,6 @@ public:
     ~BaseTcpTransmitter()
     {
 
-    }
-
-    int getSocketId()
-    {
-        return this->resourceId;
-    }
-    void setSocketId(int socketId)
-    {
-        this->resourceId = socketId;
     }
 
     int createSocket()
