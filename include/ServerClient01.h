@@ -2,26 +2,23 @@
 #define CHAT_SERVER_SERVERCLIENT01_H
 
 #include <iostream>
-#include <sys/socket.h>
 #include <netinet/in.h>
-#include <unistd.h>
 #include "bootstrap.h"
+#include "Cs01Exception.h"
+#include "ISocket.h"
 
 using std::cout;
 using std::endl;
 using std::perror;
 
-
-class ServerClient01
+class ServerClient01: public ISocket
 {
 private:
-    int socketId;
     sockaddr_in addr{};
     socklen_t   addrLen{};
 public:
-    ServerClient01()
+    ServerClient01(): ISocket()
     {
-        this->socketId = DEFAULT_INVALID_DESCRIPTOR;
         this->addrLen = sizeof(this->addr);
     }
     // 1. ЗАПРЕЩАЕМ копирование (чтобы случайно не скопировать сокет)
@@ -34,34 +31,19 @@ public:
 
     ~ServerClient01()
     {
-        this->closeFd();
+
     }
 
-    int connectToServer(int serverFd)
+    int acceptFromServer(int serverSocket)
     {
         // accept блокирует поток, пока кто-то не подключится
-        this->socketId = accept(serverFd, (struct sockaddr*)&(this->addr), &(this->addrLen));
-        if (this->socketId < 0) {
-            perror("Client. Не удалось принять подключение (accept)");
-            return -22;
+        int socketId = accept(serverSocket, (struct sockaddr*)&(this->addr), &(this->addrLen));
+        if (socketId < 0) {
+            throw Cs01Exception("Не удалось принять подключение (accept)");
         }
-        cout << "Клиент успешно подключился! Дескриптор клиента: " << this->socketId << endl;
-        return this->socketId;
-    }
-
-    int closeFd()
-    {
-        // Закрываем сокет клиента после общения
-        if (this->socketId == DEFAULT_INVALID_DESCRIPTOR) {
-            return 0;
-        }
-        int closeRes = close(this->socketId);
-        if (closeRes != 0) {
-            cout << "Client Error CloseRes = " << closeRes << endl;
-        }
-        this->socketId = DEFAULT_INVALID_DESCRIPTOR;
-
-        return closeRes;
+        this->setSocketId(socketId);
+        cout << "Клиент успешно подключился! Дескриптор клиента: " << this->getSocketId() << endl;
+        return this->getSocketId();
     }
 };
 

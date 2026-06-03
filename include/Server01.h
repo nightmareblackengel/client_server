@@ -4,7 +4,6 @@
 #include <iostream>
 #include <map>
 #include <vector>
-#include <unistd.h>
 #include "bootstrap.h"
 #include "ServerClient01.h"
 #include "Cs01Exception.h"
@@ -41,10 +40,11 @@ public:
         ServerClient01 *c1 = new ServerClient01();
 
         cout << "Ожидание входящего подключения (accept)..." << endl;
-        int clientId = c1->connectToServer(this->socketId);
-        if (clientId >= 0) {
+        int clientId = -1;
+        try {
+            clientId = c1->acceptFromServer(this->socketId);
             this->clientList[clientId] = c1;
-        } else {
+        } catch(Cs01Exception &ex1) {
             delete c1;
             c1 = nullptr;
             throw Cs01Exception("Не получилось присоединить клиента");

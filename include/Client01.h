@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
 #include <string>
 #include "bootstrap.h"
 #include "Cs01Exception.h"
@@ -44,7 +43,7 @@ public:
             cout << "Успешно подключено к серверу" << endl;
             cout << "Удерживаем соединение 3 секунды..." << endl;
             sleep(3);
-            c01.closeSocket();
+            c01.Close();
 
             cout << "Сокет закрыт. Завершение работы." << endl;
         }
