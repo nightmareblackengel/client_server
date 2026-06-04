@@ -22,8 +22,7 @@ class Server01: public BaseTcpTransmitter
 {
 private:
     IServerClientList connectedClients;
-    // TODO:x
-//    vector<thread> threadPool;
+    vector<thread> threadPool;
 public:
     Server01(): BaseTcpTransmitter()
     {
@@ -76,6 +75,27 @@ public:
         return 0;
     }
 
+    void acceptClientInThread(int clientId)
+    {
+        auto clientConnectStartAt = std::chrono::steady_clock::now();
+        int readRes = 0;
+        while (readRes == 0) {
+            try {
+                readRes = this->readFromClient(clientId);
+                cout << "readRes = " << readRes << endl;
+            } catch (Cs01Exception& ex) {
+                cout << "Заметка:" << ex.toString() << endl;
+                readRes = -1;
+            }
+        }
+        auto clientConnectEndAt = std::chrono::steady_clock::now();
+
+        cout << "start removing client [" << clientId << "]. Timeout = ["
+             << std::chrono::duration_cast<std::chrono::milliseconds>(clientConnectEndAt - clientConnectStartAt) << "]" << endl;
+        this->connectedClients.remove(clientId);
+        cout << "client [" << clientId << "] removed" << endl;
+    }
+
     static int runServer01() {
         try {
             Server01 srv;
@@ -88,26 +108,29 @@ public:
             bool isServerRun = true;
 
             while (isServerRun) {
+                // это должно выполнятся вне потока и блокироваться, чтобы не выполнять многократно  acceptNewClient - без наличия клиента
                 int clientId = srv.acceptNewClient();
 
-                // todo: thread pool this
-                auto clientConnectStartAt = std::chrono::steady_clock::now();
-                int readRes = 0;
-                while (readRes == 0) {
-                    try {
-                        readRes = srv.readFromClient(clientId);
-                        cout << "readRes = " << readRes << endl;
-                    } catch (Cs01Exception& ex) {
-                        cout << "Заметка:" << ex.toString() << endl;
-                        readRes = -1;
-                    }
-                }
-                auto clientConnectEndAt = std::chrono::steady_clock::now();
-
-                cout << "start removing client [" << clientId << "]. Timeout = ["
-                    << std::chrono::duration_cast<std::chrono::milliseconds>(clientConnectEndAt - clientConnectStartAt) << "]" << endl;
-                srv.connectedClients.remove(clientId);
-                cout << "client [" << clientId << "] removed" << endl;
+                //thread t1();
+                srv.acceptClientInThread(clientId);
+//                // todo: thread pool this
+//                auto clientConnectStartAt = std::chrono::steady_clock::now();
+//                int readRes = 0;
+//                while (readRes == 0) {
+//                    try {
+//                        readRes = srv.readFromClient(clientId);
+//                        cout << "readRes = " << readRes << endl;
+//                    } catch (Cs01Exception& ex) {
+//                        cout << "Заметка:" << ex.toString() << endl;
+//                        readRes = -1;
+//                    }
+//                }
+//                auto clientConnectEndAt = std::chrono::steady_clock::now();
+//
+//                cout << "start removing client [" << clientId << "]. Timeout = ["
+//                    << std::chrono::duration_cast<std::chrono::milliseconds>(clientConnectEndAt - clientConnectStartAt) << "]" << endl;
+//                srv.connectedClients.remove(clientId);
+//                cout << "client [" << clientId << "] removed" << endl;
             }
         }
         catch (Cs01Exception& ex) {
