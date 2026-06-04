@@ -2,24 +2,28 @@
 #define CHAT_SERVER_SERVER01_H
 
 #include <iostream>
-#include <map>
 #include <vector>
 #include <chrono>
+#include <thread>
 #include "bootstrap.h"
 #include "ServerClient01.h"
 #include "Cs01Exception.h"
 #include "BaseTcpTransmitter.h"
+#include "composition/IServerClientList.h"
 
 using std::map;
 using std::vector;
 using std::perror;
 using std::cout;
 using std::endl;
+using std::thread;
 
 class Server01: public BaseTcpTransmitter
 {
 private:
-    map<int, ServerClient01*> clientList;
+    IServerClientList connectedClients;
+    // TODO:x
+//    vector<thread> threadPool;
 public:
     Server01(): BaseTcpTransmitter()
     {
@@ -27,13 +31,8 @@ public:
     }
     ~Server01()
     {
-        // & -> used for set nullptr to clientLIst item
-        for (auto &item: this->clientList) {
-            if (item.second != nullptr) {
-                delete item.second;
-                item.second = nullptr;
-            }
-        }
+        // todo: clear threadpool
+        // if joinable -> join or abort
     }
 
     int acceptNewClient()
@@ -44,7 +43,7 @@ public:
         int clientId = -1;
         try {
             clientId = c1->acceptFromServer(this->socketId);
-            this->clientList[clientId] = c1;
+            this->connectedClients.addClient(clientId, c1);
         } catch(Cs01Exception &ex1) {
             delete c1;
             c1 = nullptr;
@@ -77,12 +76,6 @@ public:
         return 0;
     }
 
-    void removeClient(int clientId)
-    {
-        delete this->clientList[clientId];
-        this->clientList.erase(clientId);
-    }
-
     static int runServer01() {
         try {
             Server01 srv;
@@ -96,15 +89,16 @@ public:
 
             while (isServerRun) {
                 int clientId = srv.acceptNewClient();
+
+                // todo: thread pool this
                 auto clientConnectStartAt = std::chrono::steady_clock::now();
-                // TODO:
                 int readRes = 0;
                 while (readRes == 0) {
-                    cout << "readRes = " << readRes << endl;
                     try {
                         readRes = srv.readFromClient(clientId);
+                        cout << "readRes = " << readRes << endl;
                     } catch (Cs01Exception& ex) {
-                        cout << "Ошибка:" << ex.toString() << endl;
+                        cout << "Заметка:" << ex.toString() << endl;
                         readRes = -1;
                     }
                 }
@@ -112,7 +106,7 @@ public:
 
                 cout << "start removing client [" << clientId << "]. Timeout = ["
                     << std::chrono::duration_cast<std::chrono::milliseconds>(clientConnectEndAt - clientConnectStartAt) << "]" << endl;
-                srv.removeClient(clientId);
+                srv.connectedClients.remove(clientId);
                 cout << "client [" << clientId << "] removed" << endl;
             }
         }
