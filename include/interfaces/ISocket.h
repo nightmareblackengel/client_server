@@ -12,7 +12,7 @@ class ISocket
 {
 protected:
     int socketId;
-
+public:
     ISocket()
     {
         this->socketId = DEFAULT_INVALID_DESCRIPTOR;

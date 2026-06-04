@@ -11,13 +11,14 @@ using std::cout;
 using std::endl;
 using std::perror;
 
-class ServerClient01: public ISocket
+class ServerClient01
 {
 private:
     sockaddr_in addr{};
     socklen_t   addrLen{};
+    ISocket socket;
 public:
-    ServerClient01(): ISocket()
+    ServerClient01()
     {
         this->addrLen = sizeof(this->addr);
     }
@@ -41,9 +42,9 @@ public:
         if (socketId < 0) {
             throw Cs01Exception("Не удалось принять подключение (accept)");
         }
-        this->setSocketId(socketId);
-        cout << "Клиент успешно подключился! Дескриптор клиента: " << this->getSocketId() << endl;
-        return this->getSocketId();
+        this->socket.setSocketId(socketId);
+        cout << "Клиент успешно подключился! Дескриптор клиента: " << socketId << endl;
+        return socketId;
     }
 };
 
