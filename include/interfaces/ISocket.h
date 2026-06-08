@@ -40,9 +40,9 @@ public:
 
         int closeRes = close(this->socketId);
         if (closeRes == 0) {
-            cout << "resource закрыт" << endl;
+            cout << "Порт закрыт" << endl;
         } else {
-            cout << "resource незакрыт. Код ошибки: " << closeRes << endl;
+            cout << "Порт незакрыт. Код ошибки: " << closeRes << endl;
         }
         this->socketId = DEFAULT_INVALID_DESCRIPTOR;
 
