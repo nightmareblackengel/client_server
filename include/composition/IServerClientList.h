@@ -34,8 +34,12 @@ public:
 
     void remove(int clientId)
     {
-        this->freeItem(this->clientList[clientId]);
-        this->clientList.erase(clientId);
+        auto iterator = this->clientList.find(clientId);
+        if (iterator != this->clientList.end()) {
+            this->freeItem(this->clientList[clientId]);
+            this->clientList.erase(clientId);
+        }
+
     }
 
     void freeItem(ServerClient01* itemToFree)
