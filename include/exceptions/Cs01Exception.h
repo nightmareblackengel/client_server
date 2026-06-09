@@ -2,6 +2,7 @@
 #define NBE_CHAT_SERVER_CS01EXCEPTION_H
 
 #include <string>
+#include <source_location>
 
 using std::string;
 
@@ -19,15 +20,15 @@ public:
     Cs01Exception(
             string errMsg,
             string type = "None",
-            string className = ""
-            //,string methodName = ""
+            string className = "",
+            std::source_location loc = std::source_location::current()
     )
     {
         this->errorMsg      = errMsg;
         this->type          = type;
 
-        if (className.size() == 0) {
-            this->className = __func__;
+        if (className.length() == 0) {
+            this->className = loc.function_name();
         } else {
             this->className     = className;
         }
