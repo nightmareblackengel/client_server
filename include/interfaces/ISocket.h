@@ -18,7 +18,7 @@ public:
         this->socketId = DEFAULT_INVALID_DESCRIPTOR;
     }
 
-    ~ISocket()
+    virtual ~ISocket()
     {
         this->Close();
     }
