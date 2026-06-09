@@ -22,15 +22,10 @@ using std::thread;
 using std::atomic;
 using std::signal;
 
-atomic<bool> isServerRun;
-void runExitHandlers(int signum)
-{
-    cout << "[Signal] Получен сигнал " << signum << ". Инициируем вежливую остановку..." << endl;
-    isServerRun = false;
-}
-
 class Server01: public BaseTcpTransmitter
 {
+public:
+    static atomic<bool> isServerRun;
 private:
     IServerClientList connectedClients;
     vector<thread> threadPool;
@@ -39,8 +34,8 @@ public:
     Server01(): BaseTcpTransmitter()
     {
         this->errorType = CS01_SERVER_TYPE;
-        isServerRun = true;
     }
+
     ~Server01()
     {
         cout << "Server01 Desctructor" << endl;
@@ -115,12 +110,18 @@ public:
         cout << "client [" << clientId << "] removed" << endl;
     }
 
+    static void runExitHandlers(int signum)
+    {
+        cout << "[Signal] Получен сигнал " << signum << ". Инициируем вежливую остановку..." << endl;
+        Server01::isServerRun = false;
+    }
+
     // Регистрируем обработчик для SIGINT (Ctrl+C / кнопка Stop в CLion)
     // и для SIGTERM (команда kill в Linux)
     void registerExitHandlers()
     {
-        signal(SIGINT, runExitHandlers);
-        signal(SIGTERM, runExitHandlers);
+        signal(SIGINT, Server01::runExitHandlers);
+        signal(SIGTERM, Server01::runExitHandlers);
     }
 
     static int runServer01() {
@@ -133,7 +134,7 @@ public:
             srv.bindSocket();
             srv.listenSocket();
 
-            while (isServerRun) {
+            while (Server01::isServerRun) {
                 // это должно выполнятся вне потока и блокироваться, чтобы не выполнять многократно  acceptNewClient - без наличия клиента
                 int clientId = srv.acceptNewClient();
 
@@ -153,5 +154,7 @@ public:
         return 0;
     }
 };
+
+atomic<bool> Server01::isServerRun = true;
 
 #endif //CHAT_SERVER_SERVER01_H
