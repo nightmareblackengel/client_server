@@ -14,8 +14,6 @@ add_executable(${SERVER_PROJECT_NAME})
 target_sources(${SERVER_PROJECT_NAME} PRIVATE ${SERVER_CPP_FILES})
 target_include_directories(${SERVER_PROJECT_NAME} PRIVATE
         "./include/"
-        "./include/exceptions"
-        "./include/interfaces"
 )
 
 # ==========================================

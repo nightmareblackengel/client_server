@@ -4,8 +4,8 @@
 #include <iostream>
 #include <netinet/in.h>
 #include "bootstrap.h"
-#include "Cs01Exception.h"
-#include "ISocket.h"
+#include "exceptions/Cs01Exception.h"
+#include "interfaces/ISocket.h"
 
 using std::cout;
 using std::endl;

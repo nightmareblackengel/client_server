@@ -5,7 +5,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "bootstrap.h"
-#include "ISocket.h"
+#include "interfaces/ISocket.h"
 
 using std::cout;
 using std::endl;

@@ -9,7 +9,7 @@
 #include <csignal>
 #include "bootstrap.h"
 #include "ServerClient01.h"
-#include "Cs01Exception.h"
+#include "exceptions/Cs01Exception.h"
 #include "BaseTcpTransmitter.h"
 #include "composition/IServerClientList.h"
 
