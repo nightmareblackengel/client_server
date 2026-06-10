@@ -6,8 +6,8 @@
 
 using std::string;
 
-const string CS01_CLIENT_TYPE = "Client";
-const string CS01_SERVER_TYPE = "Server";
+constexpr const string CS01_CLIENT_TYPE = "Client";
+constexpr const string CS01_SERVER_TYPE = "Server";
 
 class Cs01Exception: public std::exception
 {
@@ -46,6 +46,11 @@ public:
                + "Class: [" + this->className + "]."
             //+ " Method: [" + this->methodName + "]."
                 ;
+    }
+
+    const char* what() const noexcept override
+    {
+        return this->errorMsg.c_str();
     }
 };
 

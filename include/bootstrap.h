@@ -3,7 +3,7 @@
 
 #include <sys/socket.h>
 
-const int DEFAULT_INVALID_DESCRIPTOR    = -1;
-const int SERVER_IP_TYPE    = AF_INET;
+constexpr const int DEFAULT_INVALID_DESCRIPTOR      = -1;
+constexpr const int SERVER_IP_TYPE                  = AF_INET;
 
 #endif //CHAT_SERVER_BOOTSTRAP_H

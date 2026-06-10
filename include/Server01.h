@@ -22,6 +22,8 @@ using std::thread;
 using std::atomic;
 using std::signal;
 
+int serverSocketId = DEFAULT_INVALID_DESCRIPTOR;
+
 class Server01: public BaseTcpTransmitter
 {
 public:
@@ -114,6 +116,11 @@ public:
     {
         cout << "[Signal] Получен сигнал " << signum << ". Инициируем вежливую остановку..." << endl;
         Server01::isServerRun = false;
+
+        if (serverSocketId != DEFAULT_INVALID_DESCRIPTOR) {
+            close(serverSocketId);
+            serverSocketId = DEFAULT_INVALID_DESCRIPTOR;
+        }
     }
 
     // Регистрируем обработчик для SIGINT (Ctrl+C / кнопка Stop в CLion)
@@ -131,6 +138,7 @@ public:
             srv.registerExitHandlers();
 
             srv.createSocket();
+            serverSocketId = srv.getSocketId();
             srv.bindSocket();
             srv.listenSocket();
 
