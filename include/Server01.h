@@ -22,12 +22,11 @@ using std::thread;
 using std::atomic;
 using std::signal;
 
-int serverSocketId = DEFAULT_INVALID_DESCRIPTOR;
-
 class Server01: public BaseTcpTransmitter
 {
 public:
-    static atomic<bool> isServerRun;
+    atomic<bool> isServerRun = true;
+    inline static Server01* server01Instance = nullptr;
 private:
     IServerClientList connectedClients;
     vector<thread> threadPool;
@@ -42,7 +41,6 @@ public:
     {
         this->connectedClients.closeAll();
 
-        cout << "Server01 Desctructor" << endl;
         for (thread &t1 : this->threadPool) {
             if (t1.joinable()) {
                 t1.join();
@@ -117,18 +115,26 @@ public:
     static void runExitHandlers(int signum)
     {
         cout << "[Signal] Получен сигнал " << signum << ". Инициируем вежливую остановку..." << endl;
-        Server01::isServerRun = false;
-
-        if (serverSocketId != DEFAULT_INVALID_DESCRIPTOR) {
-            close(serverSocketId);
-            serverSocketId = DEFAULT_INVALID_DESCRIPTOR;
+        if (Server01::server01Instance == nullptr) {
+            return;
         }
+        Server01::server01Instance->isServerRun = false;
+        Server01::server01Instance->Close();
+        cout << "Server shutdown. Sleep on 1 second" << endl;
+        sleep(1);
+        cout << "Server shutdown" << endl;
+//        // remove pointer
+//        cout << "remove pointer"<<endl;
+////        delete Server01::server01Instance;
+////        Server01::server01Instance = nullptr;
     }
 
     // Регистрируем обработчик для SIGINT (Ctrl+C / кнопка Stop в CLion)
     // и для SIGTERM (команда kill в Linux)
     void registerExitHandlers()
     {
+        Server01::server01Instance = this;
+
         signal(SIGINT, Server01::runExitHandlers);
         signal(SIGTERM, Server01::runExitHandlers);
     }
@@ -136,15 +142,14 @@ public:
     static int runServer01() {
         try {
             Server01 srv;
-            // TODO: move
+
             srv.registerExitHandlers();
 
             srv.createSocket();
-            serverSocketId = srv.getSocketId();
             srv.bindSocket();
             srv.listenSocket();
 
-            while (Server01::isServerRun) {
+            while (srv.isServerRun) {
                 // это должно выполнятся вне потока и блокироваться, чтобы не выполнять многократно  acceptNewClient - без наличия клиента
                 int clientId = srv.acceptNewClient();
 
@@ -152,7 +157,11 @@ public:
             }
         }
         catch (Cs01Exception& ex) {
-            cout << "Ошибка:" << ex.toString() << endl;
+            // если ошибка во время оставновки - не показываем
+            if (Server01::server01Instance != nullptr && Server01::server01Instance->isServerRun)
+            {
+                cout << "Ошибка:" << ex.toString() << endl;
+            }
         }
         catch(const char* msg) {
             cout << "ОШИБКА. Подробная информация: " << msg << endl;
@@ -164,7 +173,5 @@ public:
         return 0;
     }
 };
-
-atomic<bool> Server01::isServerRun = true;
 
 #endif //CHAT_SERVER_SERVER01_H
