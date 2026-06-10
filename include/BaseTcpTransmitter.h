@@ -99,9 +99,9 @@ public:
         return address;
     }
 
-    void throwException(const string &msg)
+    void throwException(const string &msg, std::source_location loc = std::source_location::current())
     {
-        throw Cs01Exception(msg, this->errorType);
+        throw Cs01Exception(msg, this->errorType, __func__, loc);
     }
 };
 
