@@ -27,9 +27,8 @@ public:
     }
     void unlock()
     {
-
-        this->descriptor.unlock();
         this->status = false;
+        this->descriptor.unlock();
     }
 };
 

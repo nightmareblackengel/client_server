@@ -20,6 +20,11 @@ public:
 
     ~IServerClientList()
     {
+        this->closeAll();
+    }
+
+    void closeAll()
+    {
         this->wmutexClients.lock();
 
         // & -> used for set nullptr to clientLIst item
@@ -44,7 +49,7 @@ public:
         this->wmutexClients.lock();
         auto iterator = this->clientList.find(clientId);
         if (iterator != this->clientList.end()) {
-            this->freeItem(this->clientList[clientId]);
+            this->freeItem(iterator->second);
             this->clientList.erase(clientId);
         }
 

@@ -59,6 +59,10 @@ public:
     int bindSocket()
     {
         sockaddr_in address = this->getConfiguredAddress();
+        // Проблема быстрого перезапуска сервера
+        int opt = 1;
+        setsockopt(this->getSocketId(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+
         // Привязываем сокет к адресу и порту (bind)
         int bindRes = bind(this->getSocketId(), (struct sockaddr*)&address, sizeof(address));
         if (bindRes < 0) {

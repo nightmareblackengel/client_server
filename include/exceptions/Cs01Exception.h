@@ -2,12 +2,14 @@
 #define NBE_CHAT_SERVER_CS01EXCEPTION_H
 
 #include <string>
+#include <string_view>
 #include <source_location>
 
 using std::string;
+using std::string_view;
 
-constexpr const string CS01_CLIENT_TYPE = "Client";
-constexpr const string CS01_SERVER_TYPE = "Server";
+constexpr const string_view CS01_CLIENT_TYPE = "Client";
+constexpr const string_view CS01_SERVER_TYPE = "Server";
 
 class Cs01Exception: public std::exception
 {

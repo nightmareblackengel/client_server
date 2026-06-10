@@ -40,6 +40,8 @@ public:
 
     ~Server01()
     {
+        this->connectedClients.closeAll();
+
         cout << "Server01 Desctructor" << endl;
         for (thread &t1 : this->threadPool) {
             if (t1.joinable()) {
