@@ -17,7 +17,9 @@ protected:
     string type;
     string errorMsg;
     string className;
-    //string methodName;
+    int line;
+    string fileName;
+    string functionName;
 public:
     Cs01Exception(
             string errMsg,
@@ -30,24 +32,23 @@ public:
         this->type          = type;
 
         if (className.length() == 0) {
-            this->className = loc.function_name();
+            this->className = __func__ ;
         } else {
             this->className     = className;
         }
 
-//        if (methodName.size() == 0) {
-//            this->methodName = __func__;
-//        } else {
-//            this->methodName = methodName;
-//        }
+        this->fileName = loc.file_name();
+        this->functionName = loc.function_name();
+        this->line = loc.line();
     }
 
     string toString()
     {
-        return " " + this->errorMsg + ". Type: [" + this->type + "]. "
-               + "Class: [" + this->className + "]."
-            //+ " Method: [" + this->methodName + "]."
-                ;
+        return this->errorMsg + ". Type: [" + this->type + "]. "
+               + "Class: [" + this->className + "].\n"
+               + "FuncName:" + this->functionName
+               + ". FileName: [" + this->fileName + "]:" + std::to_string(this->line)
+               + ".";
     }
 
     const char* what() const noexcept override
