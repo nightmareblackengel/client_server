@@ -65,21 +65,18 @@ public:
     // to next
     void push_start(QItem1 _item)
     {
+        QueueItem<QItem1>* newItem = new QueueItem<QItem1>(_item);
         if (this->start == nullptr) {
-            QueueItem<QItem1>* newItem = new QueueItem<QItem1>(_item);
-
             this->start = newItem;
             this->end   = newItem;
 
             newItem->next = nullptr;
             newItem->prev = nullptr;
         } else {
-            QueueItem<QItem1>* newItem = new QueueItem<QItem1>(_item);
-
-            this->start->next = newItem;
             newItem->prev = this->start;
             newItem->next = nullptr;
             // do step
+            this->start->next = newItem;
             this->start = newItem;
         }
         this->count++;
@@ -110,22 +107,25 @@ public:
         return result;
     }
 
-/*
-    // prev
     void push_end(QItem1 _item)
     {
+        QueueItem<QItem1>* newItem = new QueueItem<QItem1>(_item);
         if (this->end == nullptr) {
-            this->end = new QueueItem(_item);
-            this->start = this->end;
+            this->start = newItem;
+            this->end = newItem;
+
             this->end->prev = nullptr;
             this->end->next = nullptr;
         } else {
-            this->end->prev = new QueueItem(_item);
-            this->end->prev->prev = nullptr;
-            this->end->prev->next = this;
-            this->end = this->end->prev;
+            newItem->prev = nullptr;
+            newItem->next = this->end;
+
+            this->end->prev = newItem;
+            this->end = newItem;
         }
-    }/**/
+        this->count++;
+    }
+
     QItem1 pop_end()
     {
         if (this->end == nullptr) {
