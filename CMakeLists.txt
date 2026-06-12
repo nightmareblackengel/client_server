@@ -31,3 +31,8 @@ target_include_directories(${CLIENT_PROJECT_NAME} PRIVATE
         "./include/exceptions"
         "./include/interfaces"
 )
+# ==========================================
+# 3. Tests
+# ==========================================
+enable_testing()
+add_subdirectory("./tests")
