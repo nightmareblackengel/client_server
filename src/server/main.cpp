@@ -105,14 +105,15 @@ public:
 
             this->start = nullptr;
             this->end   = nullptr;
-            this->count = 0;
         } else {
             QueueItem<QItem1> *ptr = this->start;
+
             this->start = ptr->prev;
             this->start->next = nullptr;
+
             delete ptr;
-            this->count--;
         }
+        this->count--;
 
         return result;
     }
@@ -132,33 +133,30 @@ public:
             this->end->prev->next = this;
             this->end = this->end->prev;
         }
-    }
+    }/**/
     QItem1 pop_end()
     {
-        QItem1 result = nullptr;
         if (this->end == nullptr) {
+            throw "Warning. The queue is empty.";
+        }
 
-        } else if (this->end == this->start) {
-            result = this->end->item;
+        QItem1 result = this->end->item;
+        if (this->end == this->start) {
             delete this->end;
             this->end = nullptr;
             this->start = nullptr;
         } else if (this->end != this->start) {
-            QueueItem* ptr = this->end;
+            QueueItem<QItem1>* ptr = this->end;
+
             this->end = this->end->next;
-            result = ptr->item;
-            ptr->next = nullptr;
-//            ptr->prev = nullptr;
+            this->end->prev = nullptr;
+
             delete ptr;
         }
+        this->count--;
+
         return result;
     }
-    /**/
-
-//    void getItem()
-//    {
-//        return this->item;
-//    }
 };
 
 // TODO: template
@@ -172,16 +170,23 @@ int main() {
         MyQueue<int> mq{};
         mq.push_start(77);
         mq.push_start(78);
+        mq.push_start(79);
 
         int val11 = mq.pop_start();
-        int val12 = mq.pop_start();
+        int val101 = mq.pop_end();
+
+//        int val102 = mq.pop_end();
+//        int val12 = mq.pop_start();
+//        int val111 = mq.pop_end();
+//        int val112 = mq.pop_end();
 
         MyQueue<int> mq2{};
 
         MyQueue<int> mq3{};
         mq3.push_start(88);
-        //int val2 = mq2.pop_start();
-        //int val3 = mq3.pop_start();
+//        int val2 = mq2.pop_end();
+//        int val3 = mq3.pop_end();
+
 
         cout << "q1=" << mq.getCount() << endl;
         cout << "q2=" << mq2.getCount() << endl;
