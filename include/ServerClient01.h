@@ -25,7 +25,7 @@ public:
     // 1. ЗАПРЕЩАЕМ копирование (чтобы случайно не скопировать сокет)
     ServerClient01(const ServerClient01&) = delete;
     ServerClient01& operator=(const ServerClient01&) = delete;
-    // 2. РАЗРЕШАЕМ перемещение (Конструктор перемещения)
+    // 2. Конструктор перемещения
     ServerClient01(ServerClient01&& other) = delete;
     // 3. Оператор присваивания перемещением
     ServerClient01& operator=(ServerClient01&& other) = delete;

@@ -120,13 +120,6 @@ public:
         }
         Server01::server01Instance->isServerRun = false;
         Server01::server01Instance->Close();
-        cout << "Server shutdown. Sleep on 1 second" << endl;
-        sleep(1);
-        cout << "Server shutdown" << endl;
-//        // remove pointer
-//        cout << "remove pointer"<<endl;
-////        delete Server01::server01Instance;
-////        Server01::server01Instance = nullptr;
     }
 
     // Регистрируем обработчик для SIGINT (Ctrl+C / кнопка Stop в CLion)
