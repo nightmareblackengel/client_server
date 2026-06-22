@@ -46,9 +46,10 @@ public:
 
         // manual unlocking is done before notifying, to avoid waking up
         // the waiting thread only to block again (see notify_one for details)
+        sleep(3);
         myLock.unlock();
         MyConditionalVariable::condVar.notify_one();
-        sleep(3);
+
     }
 
     static void run()
@@ -68,6 +69,7 @@ public:
         cout << "MY notify end" << endl;
         {
             unique_lock ul(MyConditionalVariable::mut);
+            cout << "second ULOck is unlocked" << endl;
             MyConditionalVariable::condVar.wait(ul, [] {
                 return MyConditionalVariable::isProcessed;
             });
