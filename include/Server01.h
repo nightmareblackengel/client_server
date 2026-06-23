@@ -12,6 +12,7 @@
 #include "exceptions/Cs01Exception.h"
 #include "BaseTcpTransmitter.h"
 #include "composition/IServerClientList.h"
+#include "composition/MyThreadPool.h"
 
 using std::map;
 using std::vector;
@@ -29,10 +30,10 @@ public:
     inline static Server01* server01Instance = nullptr;
 private:
     IServerClientList connectedClients;
-    vector<thread> threadPool;
+    MyThreadPool tPool;
 public:
 
-    Server01(): BaseTcpTransmitter()
+    Server01(int threadPoolCount=5): BaseTcpTransmitter(), tPool(threadPoolCount)
     {
         this->errorType = CS01_SERVER_TYPE;
     }
@@ -40,13 +41,6 @@ public:
     ~Server01()
     {
         this->connectedClients.closeAll();
-
-        for (thread &t1 : this->threadPool) {
-            if (t1.joinable()) {
-                t1.join();
-            }
-        }
-        this->threadPool.clear();
     }
 
     int acceptNewClient()
@@ -92,13 +86,13 @@ public:
 
     void acceptClientInThread(int clientId)
     {
-        cout << "client [" << clientId << "] accepted success" << endl;
+        cout << "client [" << clientId << "] успешно подключился" << endl;
         auto clientConnectStartAt = std::chrono::steady_clock::now();
         int readRes = 0;
         while (readRes == 0) {
             try {
                 readRes = this->readFromClient(clientId);
-                cout << "client [" << clientId << "] ReadRes = " << readRes << endl;
+                cout << "client [" << clientId << "] прочитали следующее = " << readRes << endl;
             } catch (Cs01Exception& ex) {
                 cout << "client [" << clientId << "] Заметка:" << ex.toString() << endl;
                 readRes = -1;
@@ -106,10 +100,10 @@ public:
         }
         auto clientConnectEndAt = std::chrono::steady_clock::now();
 
-        cout << "client [" << clientId << "] start removing client [" << clientId << "]. Timeout = ["
+        cout << "client [" << clientId << "] начало закрытие клиента [" << clientId << "]. Timeout = ["
              << std::chrono::duration_cast<std::chrono::milliseconds>(clientConnectEndAt - clientConnectStartAt) << "]" << endl;
         this->connectedClients.remove(clientId);
-        cout << "client [" << clientId << "] removed" << endl;
+        cout << "client [" << clientId << "] закрыт" << endl;
     }
 
     static void runExitHandlers(int signum)
@@ -146,7 +140,9 @@ public:
                 // это должно выполнятся вне потока и блокироваться, чтобы не выполнять многократно  acceptNewClient - без наличия клиента
                 int clientId = srv.acceptNewClient();
 
-                srv.threadPool.push_back(thread(&Server01::acceptClientInThread, std::ref(srv), clientId));
+                srv.tPool.enqueueTask([&srv, clientId] {
+                    srv.acceptClientInThread(clientId);
+                });
             }
         }
         catch (Cs01Exception& ex) {

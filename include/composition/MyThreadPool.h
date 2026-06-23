@@ -41,6 +41,15 @@ public:
 
     ~MyThreadPool()
     {
+        this->stopTaskEvent();
+    }
+
+    void stopTaskEvent()
+    {
+        if (this->isThreadPoolStopped == true) {
+            return;
+        }
+
 //        cout << "destructor"<< endl;
         unique_lock ul2(this->queueMutex);
 //        cout << "destructor locked" << endl;
@@ -58,7 +67,7 @@ public:
         }
     }
 
-    void enqueueTask(std::function<void()>& newTask)
+    void enqueueTask(const std::function<void()> newTask)
     {
 //        cout << "locking TASK for push" << endl;
 //        sleep(2);
@@ -74,7 +83,7 @@ public:
 
     void workerThread(int ind)
     {
-        cout << " added to Front with i=" << ind << endl;
+//        cout << " added to Front with i=" << ind << endl;
         while(true) {
 //            cout << "[" << ind << "] try locking..." << endl;
             unique_lock ul3(this->queueMutex);
@@ -88,7 +97,7 @@ public:
 
 //            cout << "[" << ind << "] wake up..." << endl;
             if (this->isThreadPoolStopped && this->tasksQueue.empty()) {
-                cout << "cycle ended"<< endl;
+//                cout << "cycle ended"<< endl;
                 ul3.unlock();
                 break;
             }

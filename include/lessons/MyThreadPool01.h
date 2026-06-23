@@ -58,7 +58,7 @@ public:
         }
     }
 
-    void enqueueTask(std::function<void()>& newTask)
+    void enqueueTask(const std::function<void()> newTask)
     {
 //        cout << "locking TASK for push" << endl;
 //        sleep(2);
