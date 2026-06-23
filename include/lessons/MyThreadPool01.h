@@ -74,8 +74,8 @@ public:
 
     void workerThread(int ind)
     {
-//        cout << " added to Front with i=" << ind << endl;
-        while(this->isThreadPoolStopped) {
+        cout << " added to Front with i=" << ind << endl;
+        while(true) {
 //            cout << "[" << ind << "] try locking..." << endl;
             unique_lock ul3(this->queueMutex);
 
@@ -90,7 +90,7 @@ public:
             if (this->isThreadPoolStopped && this->tasksQueue.empty()) {
                 cout << "cycle ended"<< endl;
                 ul3.unlock();
-                continue;
+                break;
             }
 
             std::function<void()> task = std::move(this->tasksQueue.front());
