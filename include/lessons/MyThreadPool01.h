@@ -28,12 +28,10 @@ class MyThreadPool01
 
 
 public:
-    static bool isThreadPoolStopped;
+    bool isThreadPoolStopped = false;
 
     MyThreadPool01(int count)
     {
-        MyThreadPool01::isThreadPoolStopped = false;
-        //
         this->tPool.reserve(count);
 
         for (int ind = 0; ind < count; ind++) {
@@ -46,7 +44,7 @@ public:
 //        cout << "destructor"<< endl;
         unique_lock ul2(this->queueMutex);
 //        cout << "destructor locked" << endl;
-        MyThreadPool01::isThreadPoolStopped = true;
+        this->isThreadPoolStopped = true;
         ul2.unlock();
 //        cout << "destructor UNlocked" << endl;
 
@@ -77,7 +75,7 @@ public:
     void workerThread(int ind)
     {
 //        cout << " added to Front with i=" << ind << endl;
-        while(!MyThreadPool01::isThreadPoolStopped) {
+        while(this->isThreadPoolStopped) {
 //            cout << "[" << ind << "] try locking..." << endl;
             unique_lock ul3(this->queueMutex);
 
@@ -85,11 +83,12 @@ public:
             this->cvWorkers.wait(ul3, [this, ind] {
 //                cout << "[" << ind << "] checked " << endl;
                 // need false
-                return !this->tasksQueue.empty() || MyThreadPool01::isThreadPoolStopped;
+                return !this->tasksQueue.empty() || this->isThreadPoolStopped;
             });
 
 //            cout << "[" << ind << "] wake up..." << endl;
-            if (MyThreadPool01::isThreadPoolStopped && this->tasksQueue.empty()) {
+            if (this->isThreadPoolStopped && this->tasksQueue.empty()) {
+                cout << "cycle ended"<< endl;
                 ul3.unlock();
                 continue;
             }
@@ -105,7 +104,5 @@ public:
         }
     }
 };
-
-bool MyThreadPool01::isThreadPoolStopped = false;
 
 #endif //NBE_CHAT_SERVER_MYTHREADPOOL01_H
