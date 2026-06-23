@@ -7,12 +7,11 @@ class MyQueue;
 template <typename QItem1>
 class QueueItem
 {
+public:
     QItem1 item;
     QueueItem* next;
     QueueItem* prev;
 
-    friend class MyQueue<QItem1>;
-public:
     QueueItem(QItem1 item):item(item)
     {
 
