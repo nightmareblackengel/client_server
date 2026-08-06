@@ -34,16 +34,16 @@ public:
 
     int Close()
     {
-        cout << "Закрываем порт..." << endl;
+        cout << "Закрываем порт [" << this->socketId << "]..." << endl;
         if (this->socketId == DEFAULT_INVALID_DESCRIPTOR) {
             return 0;
         }
 
         int closeRes = close(this->socketId);
         if (closeRes == 0) {
-            cout << "Порт закрыт" << endl;
+            cout << "Порт закрыт [" << this->socketId << "]" << endl;
         } else {
-            cout << "Порт незакрыт. Код ошибки: " << closeRes << endl;
+            cout << IoTextColor::RED << "Порт незакрыт [" << this->socketId << "]. Код ошибки: " << closeRes  << IoTextColor::DEFAULT << endl;
         }
         this->socketId = DEFAULT_INVALID_DESCRIPTOR;
 

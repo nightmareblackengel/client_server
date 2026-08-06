@@ -22,6 +22,8 @@ using std::endl;
 using std::thread;
 using std::atomic;
 using std::signal;
+using std::to_string;
+using std::chrono::steady_clock;
 
 class Server01: public BaseTcpTransmitter
 {
@@ -60,47 +62,58 @@ public:
         return clientId;
     }
 
-    int readFromClient(int clientId)
+    string readFromSocket(int clientId, ssize_t& countRes)
     {
         vector<char> buff(65536);
 
         // recv() читает данные из сокета клиента.
         // Он тоже блокирующий: ждет, пока клиент что-то пришлет.
-        ssize_t bytesRead = recv(clientId, buff.data(), buff.size() - 1, 0);
-        if (bytesRead < 0) {
+        countRes = recv(clientId, buff.data(), buff.size() - 1, 0);
+        if (countRes < 0) {
             this->throwException("Ошибка при чтении данных (recv)");
         }
-        if (bytesRead == 0) {
-            this->throwException("Клиент отключился до отправки данных.");
+        if (countRes == 0) {
+            this->throwException("клиент[" + to_string(clientId) + "] отключился до отправки данных.");
         }
 
-        std::string s1 (buff.data(), bytesRead);
+        string result(buff.data(), countRes);
 
-        cout << "Получено от клиента [" << clientId << "](" << bytesRead << " байт):" << endl;
-        cout << s1 << endl;
-        cout << "----------------------------------------" << endl;
-
-        return 0;
+        return result;
     }
 
     void acceptClientInThread(int clientId)
     {
         cout << "client [" << clientId << "] успешно подключился" << endl;
-        auto clientConnectStartAt = std::chrono::steady_clock::now();
-        int readRes = 0;
-        while (readRes == 0) {
+        auto clientConnectStartAt = steady_clock::now();
+
+        ssize_t readLenRes = 0;
+        bool isClientSentMessages = true;
+        while (isClientSentMessages) {
             try {
-                readRes = this->readFromClient(clientId);
-                cout << "client [" << clientId << "] прочитали следующее = " << readRes << endl;
+                // read from client
+                string readMessage = this->readFromSocket(clientId, readLenRes);
+                // TODO: check and remove
+                cout << "server recieved len=["  << readLenRes << endl;
+                // будем выходить если пустое сообщение
+                if (readLenRes == 0) {
+                    isClientSentMessages = false;
+                    continue;
+                }
+
+                cout << "Клиент [" << clientId << "] отправил сообщение:" << endl;
+                cout << IoTextColor::CYAN << readMessage << IoTextColor::DEFAULT << endl;
+                cout << "----------------------------------------" << endl;
             } catch (Cs01Exception& ex) {
-                cout << "client [" << clientId << "] Заметка:" << ex.toString() << endl;
-                readRes = -1;
+                cout << IoTextColor::RED << "client [" << clientId << "] Заметка:" << ex.toString() << IoTextColor::DEFAULT << endl;
+                isClientSentMessages = false;
             }
         }
-        auto clientConnectEndAt = std::chrono::steady_clock::now();
+        auto clientConnectEndAt = steady_clock::now();
 
-        cout << "client [" << clientId << "] начало закрытие клиента [" << clientId << "]. Timeout = ["
-             << std::chrono::duration_cast<std::chrono::milliseconds>(clientConnectEndAt - clientConnectStartAt) << "]" << endl;
+        cout << IoTextColor::TEXT_ATTR_BOLD << IoTextColor::TEXT_ATTR_UNDERLINE
+            << "client [" << clientId << "] начало закрытие клиента [" << clientId << "]. Timeout = ["
+            << std::chrono::duration_cast<std::chrono::milliseconds>(clientConnectEndAt - clientConnectStartAt) << "]"
+            << IoTextColor::TEXT_ATTR_RESET << IoTextColor::DEFAULT << endl;
         this->connectedClients.remove(clientId);
         cout << "client [" << clientId << "] закрыт" << endl;
     }
@@ -121,6 +134,7 @@ public:
 
     int run()
     {
+        cout << IoTextColor::DEFAULT << "Сервер стартует..." << endl;
         Server01* app = Server01::inst;
         try {
             app->registerExitHandlers();
@@ -142,16 +156,16 @@ public:
             // если ошибка во время оставновки - не показываем
             if (Server01::inst->isRun)
             {
-                cout << "Ошибка:" << ex.toString() << endl;
+                cout << IoTextColor::RED << "Ошибка:" << ex.toString() << IoTextColor::DEFAULT << endl;
             }
         }
         catch(const char* msg) {
-            cout << "ОШИБКА. Подробная информация: " << msg << endl;
+            cout << IoTextColor::RED << "ОШИБКА. Подробная информация: " << msg << IoTextColor::DEFAULT<< endl;
         }
         catch(...) {
-            cout << "ОШИБКА. Экстренный выход из программы. Без дополнительной информации."<< endl;
+            cout << IoTextColor::RED << "ОШИБКА. Экстренный выход из программы. Без дополнительной информации." << IoTextColor::DEFAULT << endl;
         }
-
+        // TODO: Remove
         this->Close();
 
         return 0;
