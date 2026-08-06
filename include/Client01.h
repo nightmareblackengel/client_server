@@ -58,13 +58,21 @@ public:
 
             while (app->getIsRun() == true) {
                 // TODO: add thread there
-                // t1 = getline + sending
-                // t2 = listen
-                sleep(1);
-            }
+                // TODO: t1 = getline + sending
+                {
+                    cout << "Введите сообщение для отправки:" << endl;
+                    string newLine;
+                    std::getline(std::cin, newLine);
+                    // если сообщение пустое - будет считаться как выход
+                    if (newLine.length() == 0) {
+                        app->setIsRun(false);
+                        continue;
+                    }
+                    int sendRes = app->sendStringToSocket(newLine);
+                }
 
-            app->Close();
-            cout << "Сокет закрыт. Завершение работы." << endl;
+                // TODO: t2 = listen
+            }
         }
         catch (Cs01Exception& ex) {
             cout << IoTextColor::RED <<  "Ошибка:" << ex.toString() << IoTextColor::DEFAULT << endl;
