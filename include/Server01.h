@@ -84,26 +84,27 @@ public:
 
     void acceptClientInThread(int clientId)
     {
-        cout << "client [" << clientId << "] успешно подключился" << endl;
         auto clientConnectStartAt = steady_clock::now();
 
         ssize_t readLenRes = 0;
         bool isClientSentMessages = true;
+        std::stringstream threadStream;
+        threadStream << "В потоке=[" <<  std::this_thread::get_id() << "] ";
+
         while (isClientSentMessages) {
             try {
                 // read from client
                 string readMessage = this->readFromSocket(clientId, readLenRes);
-                // TODO: check and remove
-                cout << "server recieved len=["  << readLenRes << endl;
                 // будем выходить если пустое сообщение
                 if (readLenRes == 0) {
                     isClientSentMessages = false;
                     continue;
                 }
 
-                cout << "Клиент [" << clientId << "] отправил сообщение:" << endl;
-                cout << IoTextColor::CYAN << readMessage << IoTextColor::DEFAULT << endl;
-                cout << "----------------------------------------" << endl;
+
+                cout << threadStream.str() << "клиент [" << clientId << "] отправил сообщение:" << endl;
+                cout << threadStream.str() << IoTextColor::CYAN << readMessage << IoTextColor::DEFAULT << endl;
+                cout << threadStream.str() << "----------------------------------------" << endl;
             } catch (Cs01Exception& ex) {
                 cout << IoTextColor::RED << "client [" << clientId << "] Заметка:" << ex.toString() << IoTextColor::DEFAULT << endl;
                 isClientSentMessages = false;
@@ -111,11 +112,10 @@ public:
         }
         auto clientConnectEndAt = steady_clock::now();
 
-        cout << IoTextColor::TEXT_ATTR_BOLD << IoTextColor::TEXT_ATTR_UNDERLINE
-            << "client [" << clientId << "] начало закрытие клиента [" << clientId << "]. Timeout = ["
-            << std::chrono::duration_cast<std::chrono::milliseconds>(clientConnectEndAt - clientConnectStartAt) << "]"
-            << IoTextColor::TEXT_ATTR_RESET << IoTextColor::DEFAULT << endl;
-        cout << "для клиента [" << clientId << "]";
+        cout << threadStream.str() << IoTextColor::TEXT_ATTR_BOLD << IoTextColor::TEXT_ATTR_UNDERLINE
+            << "Начало закрытие клиента [" << clientId << "]. Время = ["
+            << std::chrono::duration_cast<std::chrono::seconds>(clientConnectEndAt - clientConnectStartAt) << "]"
+            << IoTextColor::TEXT_ATTR_RESET << IoTextColor::DEFAULT;
         this->connectedClients.remove(clientId);
     }
 
