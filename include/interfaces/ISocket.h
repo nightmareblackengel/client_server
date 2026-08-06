@@ -34,6 +34,7 @@ public:
 
     int Close()
     {
+        cout << "Закрываем порт..." << endl;
         if (this->socketId == DEFAULT_INVALID_DESCRIPTOR) {
             return 0;
         }

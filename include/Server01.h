@@ -25,13 +25,12 @@ using std::signal;
 
 class Server01: public BaseTcpTransmitter
 {
-public:
-    atomic<bool> isServerRun = true;
-    inline static Server01* server01Instance = nullptr;
 private:
     IServerClientList connectedClients;
     MyThreadPool tPool;
 public:
+    atomic<bool> isRun = true;
+    static Server01* inst;
 
     Server01(int threadPoolCount=5): BaseTcpTransmitter(), tPool(threadPoolCount)
     {
@@ -109,45 +108,39 @@ public:
     static void runExitHandlers(int signum)
     {
         cout << "[Signal] Получен сигнал " << signum << ". Инициируем вежливую остановку..." << endl;
-        if (Server01::server01Instance == nullptr) {
-            return;
-        }
-        Server01::server01Instance->isServerRun = false;
-        Server01::server01Instance->Close();
+        Server01::inst->isRun = false;
     }
 
     // Регистрируем обработчик для SIGINT (Ctrl+C / кнопка Stop в CLion)
     // и для SIGTERM (команда kill в Linux)
     void registerExitHandlers()
     {
-        Server01::server01Instance = this;
-
         signal(SIGINT, Server01::runExitHandlers);
         signal(SIGTERM, Server01::runExitHandlers);
     }
 
-    static int runServer01() {
+    int run()
+    {
+        Server01* app = Server01::inst;
         try {
-            Server01 srv;
+            app->registerExitHandlers();
 
-            srv.registerExitHandlers();
+            app->createSocket();
+            app->bindSocket();
+            app->listenSocket();
 
-            srv.createSocket();
-            srv.bindSocket();
-            srv.listenSocket();
-
-            while (srv.isServerRun) {
+            while (app->isRun) {
                 // это должно выполнятся вне потока и блокироваться, чтобы не выполнять многократно  acceptNewClient - без наличия клиента
-                int clientId = srv.acceptNewClient();
+                int clientId = app->acceptNewClient();
 
-                srv.tPool.enqueueTask([&srv, clientId] {
-                    srv.acceptClientInThread(clientId);
+                app->tPool.enqueueTask([&app, clientId] {
+                    app->acceptClientInThread(clientId);
                 });
             }
         }
         catch (Cs01Exception& ex) {
             // если ошибка во время оставновки - не показываем
-            if (Server01::server01Instance != nullptr && Server01::server01Instance->isServerRun)
+            if (Server01::inst->isRun)
             {
                 cout << "Ошибка:" << ex.toString() << endl;
             }
@@ -159,8 +152,12 @@ public:
             cout << "ОШИБКА. Экстренный выход из программы. Без дополнительной информации."<< endl;
         }
 
+        this->Close();
+
         return 0;
     }
 };
+
+Server01* Server01::inst = nullptr;
 
 #endif //CHAT_SERVER_SERVER01_H
