@@ -72,9 +72,10 @@ public:
         if (countRes < 0) {
             this->throwException("Ошибка при чтении данных (recv)");
         }
-        if (countRes == 0) {
-            this->throwException("клиент[" + to_string(clientId) + "] отключился до отправки данных.");
-        }
+        // countRes = 0 - нормальный выход
+//        if (countRes == 0) {
+//            this->throwException("клиент[" + to_string(clientId) + "] отключился до отправки данных.");
+//        }
 
         string result(buff.data(), countRes);
 
@@ -114,8 +115,8 @@ public:
             << "client [" << clientId << "] начало закрытие клиента [" << clientId << "]. Timeout = ["
             << std::chrono::duration_cast<std::chrono::milliseconds>(clientConnectEndAt - clientConnectStartAt) << "]"
             << IoTextColor::TEXT_ATTR_RESET << IoTextColor::DEFAULT << endl;
+        cout << "для клиента [" << clientId << "]";
         this->connectedClients.remove(clientId);
-        cout << "client [" << clientId << "] закрыт" << endl;
     }
 
     static void runExitHandlers(int signum)
