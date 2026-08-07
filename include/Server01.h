@@ -115,7 +115,7 @@ public:
         cout << threadStream.str() << IoTextColor::TEXT_ATTR_BOLD << IoTextColor::TEXT_ATTR_UNDERLINE
             << "Начало закрытие клиента [" << clientId << "]. Время = ["
             << std::chrono::duration_cast<std::chrono::seconds>(clientConnectEndAt - clientConnectStartAt) << "]"
-            << IoTextColor::TEXT_ATTR_RESET << IoTextColor::DEFAULT;
+            << IoTextColor::TEXT_ATTR_RESET << IoTextColor::DEFAULT << endl;
         this->connectedClients.remove(clientId);
     }
 

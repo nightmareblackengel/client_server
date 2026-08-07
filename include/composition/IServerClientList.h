@@ -44,7 +44,6 @@ public:
         for (auto &item : this->clientList){
             // "Больше не передавай и не принимай данные."
             // Но сам файловый дескриптор остается существовать.
-            cout << item.first << endl;
             shutdown(item.first, SHUT_RDWR);
         }
         this->wmutexClients.unlock();

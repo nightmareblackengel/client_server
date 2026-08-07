@@ -84,9 +84,9 @@ public:
         return listenRes;
     }
 
-    int sendStringToSocket(string& msg)
+    int sendStringToSocket(int socketId, string& msg)
     {
-        int res = send(this->socketId, msg.c_str(), msg.length(), 0);
+        int res = send(socketId, msg.c_str(), msg.length(), 0);
         if (res < 0) {
             throw Cs01Exception("Отправка сообщения завершилась ошибкой");
         }
