@@ -2,6 +2,7 @@
 #define NBE_CHAT_SERVER_CLIENT_H
 
 #include <iostream>
+#include <thread>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -14,10 +15,14 @@
 using std::string;
 using std::cout;
 using std::endl;
+using std::thread;
+using std::atomic;
 
 class Client01: public BaseTcpTransmitter
 {
-    bool isRun = true;
+    atomic<bool> isRun = true;
+    thread *sendMessageThr = nullptr;
+    thread *getMessagesThr = nullptr;
 public:
     static Client01 *inst;
 
@@ -28,6 +33,20 @@ public:
 
     ~Client01()
     {
+//        cout << "Destructor sendMessageThr... " << "" << endl;
+        if (this->sendMessageThr != nullptr) {
+//            cout << "check joinable..." << endl;
+            if (this->sendMessageThr->joinable()) {
+//                cout << "join started..." << endl;
+                // TODO: create situation where this throw exception
+                this->sendMessageThr->join();
+            }
+//            cout << "delete started..." << endl;
+            delete this->sendMessageThr;
+        }
+        if (this->getMessagesThr != nullptr) {
+            delete this->getMessagesThr;
+        }
     }
 
     bool getIsRun() const
@@ -37,6 +56,26 @@ public:
     void setIsRun(bool v)
     {
         this->isRun = v;
+    }
+
+    void sendMessageToServerHandler()
+    {
+        Client01 *app = this->inst;
+
+        while (app->getIsRun() == true) {
+            cout << "Введите сообщение для отправки:" << endl;
+            string newLine;
+            std::getline(std::cin, newLine);
+//            cout << "after getline position" << endl;
+            // если сообщение пустое - будет считаться как выход
+            if (newLine.empty()) {
+                app->setIsRun(false);
+                continue;
+            }
+            int sendRes = app->sendStringToSocket(this->socketId, newLine);
+        }
+
+        return;
     }
 
     void run()
@@ -56,23 +95,13 @@ public:
             app->connectToServer();
             cout << "Успешно подключено к серверу" << endl;
 
-            while (app->getIsRun() == true) {
-                // TODO: add thread there
-                // TODO: t1 = getline + sending
-                {
-                    cout << "Введите сообщение для отправки:" << endl;
-                    string newLine;
-                    std::getline(std::cin, newLine);
-                    // если сообщение пустое - будет считаться как выход
-                    if (newLine.length() == 0) {
-                        app->setIsRun(false);
-                        continue;
-                    }
-                    int sendRes = app->sendStringToSocket(newLine);
-                }
+            this->sendMessageThr = new thread(&Client01::sendMessageToServerHandler, this);
+            // TODO: thread 2 start// t2 = listen
 
-                // TODO: t2 = listen
+            if (this->sendMessageThr->joinable()) {
+                this->sendMessageThr->join();
             }
+            //cout << "JOIN ended" << endl;
         }
         catch (Cs01Exception& ex) {
             cout << IoTextColor::RED <<  "Ошибка:" << ex.toString() << IoTextColor::DEFAULT << endl;
@@ -83,6 +112,7 @@ public:
         catch(...) {
             cout << IoTextColor::RED << "ОШИБКА. Экстренный выход из программы. Без дополнительной информации." << IoTextColor::DEFAULT<< endl;
         }
+        //cout << "RUN ENDED ...."<< endl;
     }
 
     void registerExitHandlers()
@@ -98,15 +128,27 @@ public:
         }
         cout << "[Signal] Получен сигнал " << signum << ". Инициируем вежливую остановку..." << endl;
         Client01::inst->setIsRun(false);
+
         // в той ситуации когда пользователь захотел закрыть программу можно
         // Закрыть stdin
         // getline() -> получит EOF.
         // Но это грубый способ — после него консоль уже не работает.
+//        cout << "console stop started..." << endl;
+        // not work
         close(STDIN_FILENO);
+//        cout << "console stop ended..." << endl;
+
+        // TODO: remove if not use
+        // "Больше не передавай и не принимай данные."
+        // Но сам файловый дескриптор остается существовать.
+        // shutdown(item.first, SHUT_RDWR);
+//        cout << "cant stop the code" << endl;
     }
 };
 
 Client01* Client01::inst = nullptr;
+// TODO:
+// add throw in Client01::sendMessageToServerHandler or add try catch
 
 #endif //NBE_CHAT_SERVER_CLIENT_H
 // TODO:
