@@ -26,9 +26,8 @@ class MyThreadPool
     mutex queueMutex;
     condition_variable cvWorkers;
 
-
-public:
     bool isThreadPoolStopped = false;
+public:
 
     MyThreadPool(int count)
     {

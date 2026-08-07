@@ -48,7 +48,7 @@ public:
     {
         ServerClient01 *c1 = new ServerClient01();
 
-        cout << "Ожидание входящего подключения (accept)..." << endl;
+        cout << "Ожидание подключения нового клиента (accept)..." << endl;
         int clientId = -1;
         try {
             clientId = c1->acceptFromServer(this->socketId);
@@ -123,6 +123,11 @@ public:
     {
         cout << "[Signal] Получен сигнал " << signum << ". Инициируем вежливую остановку..." << endl;
         Server01::inst->isRun = false;
+
+        // остановим клиентов
+        Server01::inst->connectedClients.terminateAnyDataTransmit();
+        // остановим сервер
+        shutdown(Server01::inst->socketId, SHUT_RDWR);
     }
 
     // Регистрируем обработчик для SIGINT (Ctrl+C / кнопка Stop в CLion)
@@ -166,8 +171,6 @@ public:
         catch(...) {
             cout << IoTextColor::RED << "ОШИБКА. Экстренный выход из программы. Без дополнительной информации." << IoTextColor::DEFAULT << endl;
         }
-        // TODO: Remove
-        this->Close();
 
         return 0;
     }

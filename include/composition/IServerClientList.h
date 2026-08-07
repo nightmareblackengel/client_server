@@ -37,6 +37,19 @@ public:
         this->wmutexClients.unlock();
     }
 
+    // используется для принудительное остановки "блокируемых" функций при передаче данных (recv, send....)
+    void terminateAnyDataTransmit()
+    {
+        this->wmutexClients.lock();
+        for (auto &item : this->clientList){
+            // "Больше не передавай и не принимай данные."
+            // Но сам файловый дескриптор остается существовать.
+            cout << item.first << endl;
+            shutdown(item.first, SHUT_RDWR);
+        }
+        this->wmutexClients.unlock();
+    }
+
     void addClient(int clientId, ServerClient01* sClient)
     {
         this->wmutexClients.lock();
