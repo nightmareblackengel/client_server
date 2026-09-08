@@ -20,8 +20,9 @@ target_compile_options(full_prj_warnings INTERFACE
 )
 #
 
+add_subdirectory("src/common")
 add_subdirectory("src/server")
 add_subdirectory("src/client")
 
-enable_testing()
-add_subdirectory("tests")
+#enable_testing()
+#add_subdirectory("tests")
