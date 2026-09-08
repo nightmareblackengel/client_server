@@ -8,7 +8,7 @@
 #include <netinet/in.h>
 #include <string>
 #include "bootstrap.h"
-#include "Cs01Exception.h"
+#include "exceptions/Cs01Exception.h"
 #include "BaseTcpTransmitter.h"
 #include <csignal>
 
