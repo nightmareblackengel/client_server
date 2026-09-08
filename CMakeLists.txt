@@ -23,6 +23,8 @@ target_include_directories(${SERVER_PROJECT_NAME} PRIVATE
         ${PROJECT_INCLUDE_DIR}
 )
 
+target_compile_options(${SERVER_PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
+
 # ==========================================
 # 2. КОНФИГУРАЦИЯ КЛИЕНТА
 # ==========================================
@@ -34,6 +36,9 @@ target_sources(${CLIENT_PROJECT_NAME} PRIVATE ${CLIENT_CPP_FILES})
 target_include_directories(${CLIENT_PROJECT_NAME} PRIVATE
         ${PROJECT_INCLUDE_DIR}
 )
+
+target_compile_options(${CLIENT_PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
+
 # ==========================================
 # 3. Tests
 # ==========================================
