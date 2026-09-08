@@ -3,44 +3,17 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Используем стандартный C++23, а не GNU-расширения языка.
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project("nbe_chat"
         VERSION 1.0
         LANGUAGES CXX
 )
+
 SET(PROJECT_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/")
-#message(${SERVER_PROJECT_NAME})
 
-# ==========================================
-# 1. КОНФИГУРАЦИЯ СЕРВЕРА
-# ==========================================
-SET(SERVER_PROJECT_NAME "nbe_chat_server")
-SET (SERVER_CPP_FILES src/server/main.cpp)
+add_subdirectory("src/server")
+add_subdirectory("src/client")
 
-add_executable(${SERVER_PROJECT_NAME})
-target_sources(${SERVER_PROJECT_NAME} PRIVATE ${SERVER_CPP_FILES})
-target_include_directories(${SERVER_PROJECT_NAME} PRIVATE
-        ${PROJECT_INCLUDE_DIR}
-)
-
-target_compile_options(${SERVER_PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
-
-# ==========================================
-# 2. КОНФИГУРАЦИЯ КЛИЕНТА
-# ==========================================
-SET (CLIENT_PROJECT_NAME "nbe_chat_client")
-set (CLIENT_CPP_FILES src/client/main.cpp)
-
-add_executable(${CLIENT_PROJECT_NAME})
-target_sources(${CLIENT_PROJECT_NAME} PRIVATE ${CLIENT_CPP_FILES})
-target_include_directories(${CLIENT_PROJECT_NAME} PRIVATE
-        ${PROJECT_INCLUDE_DIR}
-)
-
-target_compile_options(${CLIENT_PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
-
-# ==========================================
-# 3. Tests
-# ==========================================
 enable_testing()
-add_subdirectory("./tests")
+add_subdirectory("tests")
