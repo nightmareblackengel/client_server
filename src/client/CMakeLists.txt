@@ -7,4 +7,4 @@ target_include_directories(${CLIENT_PROJECT_NAME} PRIVATE
         ${PROJECT_INCLUDE_DIR}
 )
 
-target_compile_options(${CLIENT_PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(${CLIENT_PROJECT_NAME} PRIVATE full_prj_warnings)

@@ -11,6 +11,14 @@ project("nbe_chat"
 )
 
 SET(PROJECT_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/")
+#
+add_library(full_prj_warnings INTERFACE)
+target_compile_options(full_prj_warnings INTERFACE
+        -Wall
+        -Wextra
+        -Wpedantic
+)
+#
 
 add_subdirectory("src/server")
 add_subdirectory("src/client")
