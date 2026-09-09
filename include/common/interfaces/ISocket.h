@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <unistd.h>
-#include "bootstrap.h"
+#include "common/bootstrap.h"
 
 using std::cout;
 using std::endl;

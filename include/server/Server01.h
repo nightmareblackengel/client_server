@@ -7,10 +7,10 @@
 #include <thread>
 #include <atomic>
 #include <csignal>
-#include "bootstrap.h"
+#include "common/bootstrap.h"
 #include "ServerClient01.h"
 #include "exceptions/Cs01Exception.h"
-#include "BaseTcpTransmitter.h"
+#include "common/BaseTcpTransmitter.h"
 #include "composition/IServerClientList.h"
 #include "composition/MyThreadPool.h"
 
