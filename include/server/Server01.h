@@ -9,10 +9,10 @@
 #include <csignal>
 #include "common/bootstrap.h"
 #include "ServerClient01.h"
-#include "exceptions/Cs01Exception.h"
+#include "common/exceptions/Cs01Exception.h"
 #include "common/BaseTcpTransmitter.h"
-#include "composition/IServerClientList.h"
-#include "composition/MyThreadPool.h"
+#include "common/composition/IServerClientList.h"
+#include "common/composition/MyThreadPool.h"
 
 using std::map;
 using std::vector;
