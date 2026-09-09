@@ -68,6 +68,26 @@ public:
         this->wmutexClients.unlock();
     }
 
+    // TODO: code777
+    // TODO: doubled functional
+    void sendStringToOtherClients(int fromSocketId, string& msg)
+    {
+        for (auto p1: this->clientList)
+        {
+            if (p1.first == fromSocketId) {
+                continue;
+            }
+//            try {
+//                int res = send(fromSocketId, msg.c_str(), msg.length(), 0);
+//                cout << "sending msg to client=[" << p1.first << "] from client=[" << fromSocketId << "]. Result =[" << res << "]" << endl;
+//            } catch ()
+//            {
+//
+//            }
+
+        }
+    }
+
     void freeItem(ServerClient01* &itemToFree)
     {
         delete itemToFree;
