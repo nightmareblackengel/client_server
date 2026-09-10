@@ -4,8 +4,8 @@
 #include <iostream>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include "bootstrap.h"
-#include "interfaces/ISocket.h"
+#include "common/bootstrap.h"
+#include "common/interfaces/ISocket.h"
 
 using std::cout;
 using std::endl;

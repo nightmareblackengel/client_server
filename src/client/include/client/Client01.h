@@ -7,9 +7,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string>
-#include "../../../common/include/common/bootstrap.h"
+#include "common/bootstrap.h"
 #include "common/exceptions/Cs01Exception.h"
-#include "../../../common/include/common/BaseTcpTransmitter.h"
+#include "common/BaseTcpTransmitter.h"
 #include <csignal>
 
 using std::string;

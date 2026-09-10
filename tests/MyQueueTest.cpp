@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../include/tmp/MyQueue.h"
+#include "not_used/MyQueue.h"
 
 class MyQueueTest: public testing::Test
 {

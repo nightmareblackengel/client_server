@@ -10,8 +10,8 @@ project("nbe_chat"
         LANGUAGES CXX
 )
 
-SET(PROJECT_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/")
-#
+SET(PROJECT_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+
 add_library(full_prj_warnings INTERFACE)
 target_compile_options(full_prj_warnings INTERFACE
         -Wall
@@ -20,9 +20,9 @@ target_compile_options(full_prj_warnings INTERFACE
 )
 #
 
-add_subdirectory("src/common")
-add_subdirectory("src/server")
-add_subdirectory("src/client")
+add_subdirectory("${PROJECT_SRC_DIR}/common")
+add_subdirectory("${PROJECT_SRC_DIR}/server")
+add_subdirectory("${PROJECT_SRC_DIR}/client")
 
 #enable_testing()
 #add_subdirectory("tests")
