@@ -3,7 +3,7 @@
 
 #include <map>
 #include <mutex>
-#include "common/interfaces/WrapperMutex.h"
+#include "../interfaces/WrapperMutex.h"
 
 using std::map;
 
