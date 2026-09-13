@@ -1,0 +1,21 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "development",
+      "displayName": "Development2",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/development",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "development",
+      "configurePreset": "development",
+      "jobs": 8
+    }
+  ]
+}
