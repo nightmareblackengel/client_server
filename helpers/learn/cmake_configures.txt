@@ -1,0 +1,95 @@
+Наш план обучения
+
+Я бы сейчас зафиксировал его примерно так:
+
+Блок 1. Основы CMake — уже прошли
+cmake_minimum_required
+project()
+C++ standard:
+CMAKE_CXX_STANDARD
+CMAKE_CXX_STANDARD_REQUIRED
+CMAKE_CXX_EXTENSIONS
+CMAKE_EXPORT_COMPILE_COMMANDS
+set() и переменные
+add_subdirectory()
+структура родительского/дочернего CMakeLists.txt
+
+Блок 2. Targets — практически прошли
+Что такое target
+add_executable()
+target_sources()
+target_include_directories()
+target_link_libraries()
+PRIVATE / PUBLIC / INTERFACE
+INTERFACE library
+
+Вот здесь мы действительно уже несколько раз ходим вокруг одного места. Блок можно считать практически закрытым.
+
+Блок 3. Архитектура проекта
+
+И вот сюда мы как раз сейчас пришли.
+
+common library
+Разделение:
+server
+client
+common
+Что должно находиться в common
+Что должно быть private для server/client
+Зависимости между targets
+Как строится dependency graph CMake
+
+После этого уже будет понятно, зачем мы вообще создавали nbe_chat_common, а не просто «потому что CMake так умеет».
+
+Блок 4. Управление исходниками
+.cpp / .h
+Header-only code
+Когда имеет смысл разделять declaration/implementation
+target_sources()
+Организация больших списков файлов
+file(GLOB) — почему обычно не стоит использовать
+Автоматическое добавление файлов — когда это действительно оправдано
+Твой нынешний подход с одним файлом на класс сюда как раз нормально вписывается.
+
+Блок 5. Библиотеки и линковка
+Что реально происходит при сборке:
+.cpp → .o → library/executable
+Static library
+Shared library
+STATIC / SHARED
+Как executable линкуется с library
+Разница между CMake target и физическим .a/.so
+Транзитивные зависимости
+
+Вот сюда я бы перенёс глубокий разговор о том, как именно работают зависимости. А не продолжал сейчас бесконечно объяснять INTERFACE.
+
+Блок 6. Compiler configuration
+Warning levels
+-Wall, -Wextra, -Wpedantic
+Почему warning target можно сделать отдельным INTERFACE
+Debug / Release
+CMAKE_BUILD_TYPE
+target_compile_features
+target_compile_options
+target_compile_definitions
+
+Блок 7. Тестирование
+enable_testing()
+add_test()
+GoogleTest / Catch2
+Отдельный target для тестов
+Почему мы пока не распространяем наши warnings на tests
+
+Блок 8. Качество кода
+compile_commands.json
+clang-tidy
+clang-format
+static analysis
+интеграция всего этого с CLion
+
+Блок 9. Dependency management
+find_package()
+FetchContent
+CPM.cmake / аналоги
+Подключение внешних библиотек
+Как правильно передавать их через targets

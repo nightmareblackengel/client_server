@@ -3,7 +3,7 @@
   "configurePresets": [
     {
       "name": "development",
-      "displayName": "Development2",
+      "displayName": "Development3",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/development",
       "cacheVariables": {
