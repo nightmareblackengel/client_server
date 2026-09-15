@@ -84,8 +84,6 @@ public:
         return listenRes;
     }
 
-    // TODO: code777
-    // TODO: doubled functional
     int sendStringToSocket(int socketId, string& msg)
     {
         int res = send(socketId, msg.c_str(), msg.length(), 0);

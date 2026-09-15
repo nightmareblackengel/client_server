@@ -105,9 +105,8 @@ public:
                 cout << threadStream.str() << IoTextColor::CYAN << readMessage << IoTextColor::DEFAULT << endl;
                 cout << threadStream.str() << "----------------------------------------" << endl;
                 // отправим сообщение остальным пользователям
-                // TODO: add try catch
-                // TODO: code777
-                // this->connectedClients.sendStringToOtherClients(clientId, readMessage);
+                // TODO: add as Task
+                this->connectedClients.sendStringToOtherClients(clientId, readMessage);
             } catch (Cs01Exception& ex) {
                 cout << IoTextColor::RED << "client [" << clientId << "] Заметка:" << ex.toString() << IoTextColor::DEFAULT << endl;
                 isClientSentMessages = false;
