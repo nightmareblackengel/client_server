@@ -58,7 +58,7 @@ public:
 
         this->cvWorkers.notify_all();
 
-        for (int ind = 0; ind < this->tPool.size(); ind++) {
+        for (uint64_t ind = 0; ind < this->tPool.size(); ind++) {
             if (this->tPool[ind].joinable()) {
                 this->tPool[ind].join();
 //                cout << "worker with i=[" << ind << "] joined" << endl;
