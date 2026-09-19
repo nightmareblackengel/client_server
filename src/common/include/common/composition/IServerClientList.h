@@ -71,19 +71,20 @@ public:
     void broadcastMessage(int fromSocketId, string& msg)
     {
         this->wmutexClients.lock();
-        uint clientIdList[this->clientList.size()], clientIdsCount = 0, ind1;
+        int clientIdList[this->clientList.size()], clientIdsCount = 0, ind1;
         for (auto p1: this->clientList) {
-            clientIdList[clientIdsCount] = p1.first;
+            if (p1.first != fromSocketId) {
+                clientIdList[clientIdsCount] = p1.first;
+            }
+
             clientIdsCount++;
         }
         this->wmutexClients.unlock();
         ///
         for (ind1 = 0; ind1 < clientIdsCount; ind1++) {
             try {
-                cout << "ind1=[" << ind1 << "] clientIds=["<< clientIdsCount << "]" << endl;
-                // TODO: incorrect fileDescriptor, maybe need to use clientId
                 // check it when realize "get message" on client.
-                int res = send(fromSocketId, msg.c_str(), msg.length(), 0);
+                int res = send(clientIdList[ind1], msg.c_str(), msg.length(), 0);
                 cout << "sending msg to client=[" << clientIdList[ind1] << "] from client=[" << fromSocketId << "]. Result =[" << res << "]" << endl;
             } catch (...)
             {
