@@ -29,12 +29,17 @@ class Server01: public BaseTcpTransmitter
 {
 private:
     IServerClientList connectedClients;
-    MyThreadPool tPool;
+    MyThreadPool clientsThrPool;
+    MyThreadPool clientsSendMessagesThrPool;
 public:
     atomic<bool> isRun = true;
     static Server01* inst;
 
-    Server01(int threadPoolCount=5): BaseTcpTransmitter(), tPool(threadPoolCount)
+    // TODO: if real clients count > clientsThrPoolCount -> than he can't sent messages
+    Server01(int clientsThrPoolCount=10, int clientsSendMsgThrPoolCount = 5):
+        BaseTcpTransmitter(),
+        clientsThrPool(clientsThrPoolCount),
+        clientsSendMessagesThrPool(clientsSendMsgThrPoolCount)
     {
         this->errorType = CS01_SERVER_TYPE;
     }
@@ -105,8 +110,9 @@ public:
                 cout << threadStream.str() << IoTextColor::CYAN << readMessage << IoTextColor::DEFAULT << endl;
                 cout << threadStream.str() << "----------------------------------------" << endl;
                 // отправим сообщение остальным пользователям
-                // TODO: add as Task
-                this->connectedClients.sendStringToOtherClients(clientId, readMessage);
+                this->clientsSendMessagesThrPool.enqueueTask([this, clientId, &readMessage] () {
+                    this->connectedClients.sendStringToOtherClients(clientId, readMessage);
+                });
             } catch (Cs01Exception& ex) {
                 cout << IoTextColor::RED << "client [" << clientId << "] Заметка:" << ex.toString() << IoTextColor::DEFAULT << endl;
                 isClientSentMessages = false;
@@ -155,7 +161,7 @@ public:
                 // это должно выполнятся вне потока и блокироваться, чтобы не выполнять многократно  acceptNewClient - без наличия клиента
                 int clientId = app->acceptNewClient();
 
-                app->tPool.enqueueTask([&app, clientId] {
+                app->clientsThrPool.enqueueTask([&app, clientId] {
                     app->acceptClientInThread(clientId);
                 });
             }
