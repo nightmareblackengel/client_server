@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string>
+#include <sstream>
 #include "common/bootstrap.h"
 #include "common/exceptions/Cs01Exception.h"
 #include "common/BaseTcpTransmitter.h"
@@ -35,12 +36,19 @@ public:
     {
 //        cout << "Destructor sendMessageThr... " << "" << endl;
         this->freeSendMsgThread();
-
-        if (this->getMessagesThr != nullptr) {
-            delete this->getMessagesThr;
-        }
+        this->freeGetMsgThread();
     }
 
+    void freeGetMsgThread()
+    {
+        if (this->getMessagesThr != nullptr) {
+            if (this->getMessagesThr->joinable()) {
+                this->getMessagesThr->join();
+            }
+            delete this->getMessagesThr;
+            this->getMessagesThr = nullptr;
+        }
+    }
     void freeSendMsgThread()
     {
         if (this->sendMessageThr != nullptr) {
@@ -85,6 +93,23 @@ public:
         return;
     }
 
+    void getMessageFromHandler()
+    {
+        std::stringstream threadStream;
+        threadStream << "В потоке=[" <<  std::this_thread::get_id() << "] ";
+        ssize_t readLenRes = 0;
+        int socketId = this->getSocketId();
+        string readMessage = Client01::readFromSocket(socketId, readLenRes);
+        if (readMessage.length() != 0) {
+            cout << threadStream.str() << "клиент [" << socketId << "] отправил сообщение:" << endl;
+            cout << threadStream.str() << IoTextColor::CYAN << readMessage << IoTextColor::DEFAULT << endl;
+            cout << threadStream.str() << "----------------------------------------" << endl;
+            cout << readMessage << endl;
+        } else {
+            cout << IoTextColor::RED << "ОШИБКА. Сообщение содержит пустую строку " << IoTextColor::DEFAULT << endl;
+        }
+    }
+
     void run()
     {
         cout << IoTextColor::DEFAULT << "Запуск консольного клиента..." << endl;
@@ -103,9 +128,10 @@ public:
             cout << "Успешно подключено к серверу" << endl;
 
             this->sendMessageThr = new thread(&Client01::sendMessageToServerHandler, this);
-            // TODO: thread 2 start// t2 = listen
+            this->getMessagesThr = new thread(&Client01::getMessageFromHandler, this);
 
             this->freeSendMsgThread();
+            this->freeGetMsgThread();
             //cout << "JOIN ended" << endl;
         }
         catch (Cs01Exception& ex) {

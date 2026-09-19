@@ -67,26 +67,6 @@ public:
         return clientId;
     }
 
-    string readFromSocket(int clientId, ssize_t& countRes)
-    {
-        vector<char> buff(65536);
-
-        // recv() читает данные из сокета клиента.
-        // Он тоже блокирующий: ждет, пока клиент что-то пришлет.
-        countRes = recv(clientId, buff.data(), buff.size() - 1, 0);
-        if (countRes < 0) {
-            this->throwException("Ошибка при чтении данных (recv)");
-        }
-        // countRes = 0 - нормальный выход
-//        if (countRes == 0) {
-//            this->throwException("клиент[" + to_string(clientId) + "] отключился до отправки данных.");
-//        }
-
-        string result(buff.data(), countRes);
-
-        return result;
-    }
-
     void acceptClientInThread(int clientId)
     {
         auto clientConnectStartAt = steady_clock::now();

@@ -4,11 +4,13 @@
 #include <iostream>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <vector>
 #include "common/bootstrap.h"
 #include "common/interfaces/ISocket.h"
 
 using std::cout;
 using std::endl;
+using std::vector;
 
 const char* SERVER_HOST     = "127.0.0.1";
 const int SERVER_PORT       = 8899;
@@ -91,6 +93,22 @@ public:
             throw Cs01Exception("Отправка сообщения завершилась ошибкой");
         }
         return res;
+    }
+
+    string readFromSocket(int socketId, ssize_t& countRes)
+    {
+        vector<char> buff(65536);
+
+        // recv() читает данные из сокета клиента.
+        // Он тоже блокирующий: ждет, пока клиент что-то пришлет.
+        countRes = recv(socketId, buff.data(), buff.size() - 1, 0);
+        if (countRes < 0) {
+            this->throwException("Ошибка при чтении данных (recv)");
+        }
+
+        string result(buff.data(), countRes);
+
+        return result;
     }
 
     sockaddr_in getConfiguredAddress()
