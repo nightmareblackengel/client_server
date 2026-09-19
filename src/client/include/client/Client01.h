@@ -95,18 +95,21 @@ public:
 
     void getMessageFromHandler()
     {
+        Client01 *app = this->inst;
+
         std::stringstream threadStream;
         threadStream << "В потоке=[" <<  std::this_thread::get_id() << "] ";
         ssize_t readLenRes = 0;
-        int socketId = this->getSocketId();
-        string readMessage = Client01::readFromSocket(socketId, readLenRes);
-        if (readMessage.length() != 0) {
-            cout << threadStream.str() << "клиент [" << socketId << "] отправил сообщение:" << endl;
-            cout << threadStream.str() << IoTextColor::CYAN << readMessage << IoTextColor::DEFAULT << endl;
-            cout << threadStream.str() << "----------------------------------------" << endl;
-            cout << readMessage << endl;
-        } else {
-            cout << IoTextColor::RED << "ОШИБКА. Сообщение содержит пустую строку " << IoTextColor::DEFAULT << endl;
+        int socketId = app->getSocketId();
+        while (app->getIsRun() == true) {
+            string readMessage = Client01::readFromSocket(socketId, readLenRes);
+            if (!readMessage.empty()) {
+                cout << threadStream.str() << "клиент отправил сообщение:" << endl;
+                cout << threadStream.str() << IoTextColor::CYAN << readMessage << IoTextColor::DEFAULT << endl;
+                cout << threadStream.str() << "----------------------------------------" << endl;
+            } else {
+                cout << IoTextColor::RED << "ОШИБКА. Сообщение содержит пустую строку " << IoTextColor::DEFAULT << endl;
+            }
         }
     }
 
