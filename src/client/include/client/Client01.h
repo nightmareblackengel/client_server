@@ -34,6 +34,15 @@ public:
     ~Client01()
     {
 //        cout << "Destructor sendMessageThr... " << "" << endl;
+        this->freeSendMsgThread();
+
+        if (this->getMessagesThr != nullptr) {
+            delete this->getMessagesThr;
+        }
+    }
+
+    void freeSendMsgThread()
+    {
         if (this->sendMessageThr != nullptr) {
 //            cout << "check joinable..." << endl;
             if (this->sendMessageThr->joinable()) {
@@ -43,9 +52,7 @@ public:
             }
 //            cout << "delete started..." << endl;
             delete this->sendMessageThr;
-        }
-        if (this->getMessagesThr != nullptr) {
-            delete this->getMessagesThr;
+            this->sendMessageThr = nullptr;
         }
     }
 
@@ -98,9 +105,7 @@ public:
             this->sendMessageThr = new thread(&Client01::sendMessageToServerHandler, this);
             // TODO: thread 2 start// t2 = listen
 
-            if (this->sendMessageThr->joinable()) {
-                this->sendMessageThr->join();
-            }
+            this->freeSendMsgThread();
             //cout << "JOIN ended" << endl;
         }
         catch (Cs01Exception& ex) {
