@@ -68,16 +68,23 @@ public:
         this->wmutexClients.unlock();
     }
 
-    void sendStringToOtherClients(int fromSocketId, string& msg)
+    void broadcastMessage(int fromSocketId, string& msg)
     {
-        for (auto p1: this->clientList)
-        {
-            if (p1.first == fromSocketId) {
-                continue;
-            }
+        this->wmutexClients.lock();
+        uint clientIdList[this->clientList.size()], clientIdsCount = 0, ind1;
+        for (auto p1: this->clientList) {
+            clientIdList[clientIdsCount] = p1.first;
+            clientIdsCount++;
+        }
+        this->wmutexClients.unlock();
+        ///
+        for (ind1 = 0; ind1 < clientIdsCount; ind1++) {
             try {
+                cout << "ind1=[" << ind1 << "] clientIds=["<< clientIdsCount << "]" << endl;
+                // TODO: incorrect fileDescriptor, maybe need to use clientId
+                // check it when realize "get message" on client.
                 int res = send(fromSocketId, msg.c_str(), msg.length(), 0);
-                cout << "sending msg to client=[" << p1.first << "] from client=[" << fromSocketId << "]. Result =[" << res << "]" << endl;
+                cout << "sending msg to client=[" << clientIdList[ind1] << "] from client=[" << fromSocketId << "]. Result =[" << res << "]" << endl;
             } catch (...)
             {
                 cout << "MY TMP ERROR" << endl;

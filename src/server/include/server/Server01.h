@@ -111,7 +111,7 @@ public:
                 cout << threadStream.str() << "----------------------------------------" << endl;
                 // отправим сообщение остальным пользователям
                 this->clientsSendMessagesThrPool.enqueueTask([this, clientId, &readMessage] () {
-                    this->connectedClients.sendStringToOtherClients(clientId, readMessage);
+                    this->connectedClients.broadcastMessage(clientId, readMessage);
                 });
             } catch (Cs01Exception& ex) {
                 cout << IoTextColor::RED << "client [" << clientId << "] Заметка:" << ex.toString() << IoTextColor::DEFAULT << endl;
