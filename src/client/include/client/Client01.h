@@ -95,6 +95,7 @@ public:
 
     void getMessageFromHandler()
     {
+        // TODO: send message to closed client
         Client01 *app = this->inst;
 
         std::stringstream threadStream;
