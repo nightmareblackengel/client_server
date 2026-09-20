@@ -1,7 +1,9 @@
 #ifndef CHAT_SERVER_BOOTSTRAP_H
 #define CHAT_SERVER_BOOTSTRAP_H
 
+#include <string>
 #include <sys/socket.h>
+
 using std::string;
 
 constexpr const int DEFAULT_INVALID_DESCRIPTOR      = -1;
