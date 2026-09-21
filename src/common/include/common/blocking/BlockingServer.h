@@ -7,6 +7,10 @@
 class BlockingServer: public BlockingTransmitter
 {
 public:
+    BlockingServer(): BlockingTransmitter()
+    {
+        this->errorType = CS01_SERVER_TYPE;
+    }
     virtual int bindSocket()
     {
         sockaddr_in address = this->getConfiguredAddress();

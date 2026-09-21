@@ -7,6 +7,11 @@
 class BlockingClient: public BlockingTransmitter
 {
 public:
+    BlockingClient(): BlockingTransmitter()
+    {
+        this->errorType = CS01_CLIENT_TYPE;
+    }
+
     virtual int connectToSocket()
     {
         // Настройка структуры адреса сервера

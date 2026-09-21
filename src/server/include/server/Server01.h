@@ -6,13 +6,13 @@
 #include <chrono>
 #include <thread>
 #include <atomic>
-#include <csignal>
 #include "common/bootstrap.h"
 #include "server/ServerClient01.h"
 #include "common/exceptions/Cs01Exception.h"
 #include "common/composition/IServerClientList.h"
 #include "common/composition/MyThreadPool.h"
 #include "common/blocking/BlockingServer.h"
+#include "common/LinuxExitHandlers.h"
 
 using std::map;
 using std::vector;
@@ -21,11 +21,10 @@ using std::cout;
 using std::endl;
 using std::thread;
 using std::atomic;
-using std::signal;
 using std::to_string;
 using std::chrono::steady_clock;
 
-class Server01: public BlockingServer
+class Server01: public BlockingServer, public LinuxExitHandlers<Server01>
 {
 private:
     IServerClientList connectedClients;
@@ -38,10 +37,11 @@ public:
     // TODO: if real clients count > clientsThrPoolCount -> than he can't sent messages
     Server01(int clientsThrPoolCount=10, int clientsSendMsgThrPoolCount = 5):
             BlockingServer(),
+            LinuxExitHandlers<Server01>(),
             clientsThrPool(clientsThrPoolCount),
             clientsSendMessagesThrPool(clientsSendMsgThrPoolCount)
     {
-        this->errorType = CS01_SERVER_TYPE;
+
     }
 
     ~Server01()

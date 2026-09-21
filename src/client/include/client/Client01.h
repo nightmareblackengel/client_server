@@ -11,7 +11,7 @@
 #include "common/bootstrap.h"
 #include "common/exceptions/Cs01Exception.h"
 #include "common/blocking/BlockingClient.h"
-#include <csignal>
+#include "common/LinuxExitHandlers.h"
 
 using std::string;
 using std::cout;
@@ -19,7 +19,7 @@ using std::endl;
 using std::thread;
 using std::atomic;
 
-class Client01: public BlockingClient
+class Client01: public BlockingClient, public LinuxExitHandlers<Client01>
 {
     atomic<bool> isRun = true;
     thread *sendMessageThr = nullptr;
@@ -29,7 +29,7 @@ public:
 
     Client01(): BlockingClient()
     {
-        this->errorType = CS01_CLIENT_TYPE;
+
     }
 
     ~Client01()
@@ -148,12 +148,6 @@ public:
             cout << IoTextColor::RED << "ОШИБКА. Экстренный выход из программы. Без дополнительной информации." << IoTextColor::DEFAULT<< endl;
         }
         //cout << "RUN ENDED ...."<< endl;
-    }
-
-    void registerExitHandlers()
-    {
-        signal(SIGINT, Client01::runExitHandlers);
-        signal(SIGTERM, Client01::runExitHandlers);
     }
 
     static void runExitHandlers(int signum)
