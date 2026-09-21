@@ -7,7 +7,7 @@
 #include <arpa/inet.h>
 #include <vector>
 #include "common/bootstrap.h"
-#include "common/interfaces/RaiiSocket.h"
+#include "common/raii/RaiiSocket.h"
 
 using std::cout;
 using std::endl;

@@ -2,7 +2,7 @@
 #ifndef NBE_CHAT_RAIISOCKET_H
 #define NBE_CHAT_RAIISOCKET_H
 
-#include "common/interfaces/RaiiFileDescriptor.h"
+#include "RaiiFileDescriptor.h"
 
 class RaiiSocket: public RaiiFileDescriptor
 {
