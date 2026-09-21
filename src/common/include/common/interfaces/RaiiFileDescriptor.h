@@ -11,11 +11,11 @@ using std::endl;
 class RaiiFileDescriptor
 {
 protected:
-    int socketId;
+    int identificator;
 public:
     RaiiFileDescriptor()
     {
-        this->socketId = DEFAULT_INVALID_DESCRIPTOR;
+        this->identificator = DEFAULT_INVALID_DESCRIPTOR;
     }
 
     virtual ~RaiiFileDescriptor()
@@ -29,29 +29,29 @@ public:
     RaiiFileDescriptor(RaiiFileDescriptor&&) = delete;
     RaiiFileDescriptor& operator=(RaiiFileDescriptor&&) = delete;
 
-    int getSocketId()
+    int getId()
     {
-        return this->socketId;
+        return this->identificator;
     }
-    void setSocketId(int _socketId)
+    void setId(int _socketId)
     {
-        this->socketId = _socketId;
+        this->identificator = _socketId;
     }
 
     int Close()
     {
-        cout << "Закрываем дескриптор [" << this->socketId << "]..." << endl;
-        if (this->socketId == DEFAULT_INVALID_DESCRIPTOR) {
+        cout << "Закрываем дескриптор [" << this->identificator << "]..." << endl;
+        if (this->identificator == DEFAULT_INVALID_DESCRIPTOR) {
             return 0;
         }
 
-        int closeRes = close(this->socketId);
+        int closeRes = close(this->identificator);
         if (closeRes == 0) {
-            cout << "Дескриптор закрыт [" << this->socketId << "]" << endl;
+            cout << "Дескриптор закрыт [" << this->identificator << "]" << endl;
         } else {
-            cout << IoTextColor::RED << "Дескриптор незакрыт [" << this->socketId << "]. Код ошибки: " << closeRes  << IoTextColor::DEFAULT << endl;
+            cout << IoTextColor::RED << "Дескриптор незакрыт [" << this->identificator << "]. Код ошибки: " << closeRes  << IoTextColor::DEFAULT << endl;
         }
-        this->socketId = DEFAULT_INVALID_DESCRIPTOR;
+        this->identificator = DEFAULT_INVALID_DESCRIPTOR;
 
         return closeRes;
     }

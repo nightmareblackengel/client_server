@@ -42,7 +42,7 @@ public:
         if (socketId < 0) {
             throw Cs01Exception("Не удалось принять подключение (accept)");
         }
-        this->socket.setSocketId(socketId);
+        this->socket.setId(socketId);
         cout << "Клиент успешно подключился! Дескриптор клиента: " << socketId << endl;
         return socketId;
     }
