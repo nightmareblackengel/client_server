@@ -16,18 +16,18 @@ using std::vector;
 const char* SERVER_HOST     = "127.0.0.1";
 const int SERVER_PORT       = 8899;
 
-class BaseTcpTransmitter
+class BaseTransmitter
 {
 protected:
     string errorType = "None";
     RaiiSocket bSocket;
 public:
-    BaseTcpTransmitter()
+    BaseTransmitter()
     {
 
     }
 
-    ~BaseTcpTransmitter()
+    ~BaseTransmitter()
     {
 
     }

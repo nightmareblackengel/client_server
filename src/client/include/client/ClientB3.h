@@ -3,9 +3,9 @@
 
 #include "common/bootstrap.h"
 #include "common/exceptions/Cs01Exception.h"
-#include "common/BaseTcpTransmitter.h"
+#include "common/BaseTransmitter.h"
 
-class ClientB3: public BaseTcpTransmitter
+class ClientB3: public BaseTransmitter
 {
 
 };

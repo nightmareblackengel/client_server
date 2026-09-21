@@ -10,7 +10,7 @@
 #include "common/bootstrap.h"
 #include "server/ServerClient01.h"
 #include "common/exceptions/Cs01Exception.h"
-#include "common/BaseTcpTransmitter.h"
+#include "common/BaseTransmitter.h"
 #include "common/composition/IServerClientList.h"
 #include "common/composition/MyThreadPool.h"
 
@@ -25,7 +25,7 @@ using std::signal;
 using std::to_string;
 using std::chrono::steady_clock;
 
-class Server01: public BaseTcpTransmitter
+class Server01: public BaseTransmitter
 {
 private:
     IServerClientList connectedClients;
@@ -37,9 +37,9 @@ public:
 
     // TODO: if real clients count > clientsThrPoolCount -> than he can't sent messages
     Server01(int clientsThrPoolCount=10, int clientsSendMsgThrPoolCount = 5):
-        BaseTcpTransmitter(),
-        clientsThrPool(clientsThrPoolCount),
-        clientsSendMessagesThrPool(clientsSendMsgThrPoolCount)
+            BaseTransmitter(),
+            clientsThrPool(clientsThrPoolCount),
+            clientsSendMessagesThrPool(clientsSendMsgThrPoolCount)
     {
         this->errorType = CS01_SERVER_TYPE;
     }

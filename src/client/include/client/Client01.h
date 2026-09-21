@@ -10,7 +10,7 @@
 #include <sstream>
 #include "common/bootstrap.h"
 #include "common/exceptions/Cs01Exception.h"
-#include "common/BaseTcpTransmitter.h"
+#include "common/BaseTransmitter.h"
 #include <csignal>
 
 using std::string;
@@ -19,7 +19,7 @@ using std::endl;
 using std::thread;
 using std::atomic;
 
-class Client01: public BaseTcpTransmitter
+class Client01: public BaseTransmitter
 {
     atomic<bool> isRun = true;
     thread *sendMessageThr = nullptr;
@@ -27,7 +27,7 @@ class Client01: public BaseTcpTransmitter
 public:
     static Client01 *inst;
 
-    Client01(): BaseTcpTransmitter()
+    Client01(): BaseTransmitter()
     {
         this->errorType = CS01_CLIENT_TYPE;
     }

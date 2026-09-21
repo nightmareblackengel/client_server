@@ -8,14 +8,14 @@
 #include "common/bootstrap.h"
 #include "server/ServerClient01.h"
 #include "common/exceptions/Cs01Exception.h"
-#include "common/BaseTcpTransmitter.h"
+#include "common/BaseTransmitter.h"
 #include "common/composition/IServerClientList.h"
 #include "common/composition/MyThreadPool.h"
 
 using std::atomic;
 using std::string;
 
-class ServerB3: public BaseTcpTransmitter
+class ServerB3: public BaseTransmitter
 {
 private:
     IServerClientList connectedClients;
