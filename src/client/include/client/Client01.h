@@ -87,7 +87,7 @@ public:
                 app->setIsRun(false);
                 continue;
             }
-            int sendRes = app->sendStringToSocket(this->socketId, newLine);
+            int sendRes = app->sendStringToSocket(this->bSocket.getId(), newLine);
         }
 
         return;
@@ -101,7 +101,7 @@ public:
         std::stringstream threadStream;
         threadStream << "В потоке=[" <<  std::this_thread::get_id() << "] ";
         ssize_t readLenRes = 0;
-        int socketId = app->getSocketId();
+        int socketId = app->bSocket.getId();
         while (app->getIsRun() == true) {
             string readMessage = Client01::readFromSocket(socketId, readLenRes);
             if (!readMessage.empty()) {
@@ -128,7 +128,7 @@ public:
 
             cout << "Попытка подключения к серверу (127.0.0.1:8899)..." << endl;
             // Подключение к серверу
-            app->connectToServer();
+            app->connectToSocket();
             cout << "Успешно подключено к серверу" << endl;
 
             this->sendMessageThr = new thread(&Client01::sendMessageToServerHandler, this);

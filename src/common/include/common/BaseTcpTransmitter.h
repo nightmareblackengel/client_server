@@ -47,7 +47,7 @@ public:
         return 0;
     }
 
-    int connectToServer()
+    int connectToSocket()
     {
         // Настройка структуры адреса сервера
         sockaddr_in address = this->getConfiguredAddress();
