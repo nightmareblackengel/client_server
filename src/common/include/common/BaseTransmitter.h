@@ -28,17 +28,12 @@ public:
 
     }
 
-    ~BaseTransmitter()
+    virtual ~BaseTransmitter()
     {
 
     }
 
     virtual int createSocket() = 0;
-
-    virtual int connectToSocket() = 0;
-
-    virtual int bindSocket() = 0;
-    virtual int listenSocket(int requestSize = 10) = 0;
 
     virtual int sendStringToSocket(int socketId, string& msg) = 0;
     virtual string readFromSocket(int socketId, ssize_t& countRes) = 0;

@@ -7,7 +7,7 @@
 class BlockingClient: public BlockingTransmitter
 {
 public:
-    int connectToSocket() override
+    virtual int connectToSocket()
     {
         // Настройка структуры адреса сервера
         sockaddr_in address = this->getConfiguredAddress();

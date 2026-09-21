@@ -7,7 +7,7 @@
 class BlockingServer: public BlockingTransmitter
 {
 public:
-    int bindSocket() override
+    virtual int bindSocket()
     {
         sockaddr_in address = this->getConfiguredAddress();
         // Проблема быстрого перезапуска сервера
@@ -23,7 +23,7 @@ public:
         return bindRes;
     }
 
-    int listenSocket(int requestSize = 10) override
+    virtual int listenSocket(int requestSize = 10)
     {
         // Переводим сокет в режим прослушивания (listen)
         // 10 - это размер очереди "недообработанных" подключений (backlog)
