@@ -8,7 +8,6 @@
 #include "common/bootstrap.h"
 #include "server/ServerClient01.h"
 #include "common/exceptions/Cs01Exception.h"
-#include "common/BaseTransmitter.h"
 #include "common/composition/IServerClientList.h"
 #include "common/composition/MyThreadPool.h"
 
@@ -23,7 +22,7 @@ public:
     atomic<bool> isRun = true;
     static ServerB3* inst;
 
-    ServerB3(): BaseTcpTransmitter()
+    ServerB3(): BaseTransmitter()
     {
         this->errorType = CS01_SERVER_TYPE;
     }

@@ -10,9 +10,9 @@
 #include "common/bootstrap.h"
 #include "server/ServerClient01.h"
 #include "common/exceptions/Cs01Exception.h"
-#include "common/BaseTransmitter.h"
 #include "common/composition/IServerClientList.h"
 #include "common/composition/MyThreadPool.h"
+#include "common/blocking/BlockingServer.h"
 
 using std::map;
 using std::vector;
@@ -25,7 +25,7 @@ using std::signal;
 using std::to_string;
 using std::chrono::steady_clock;
 
-class Server01: public BaseTransmitter
+class Server01: public BlockingServer
 {
 private:
     IServerClientList connectedClients;
@@ -37,7 +37,7 @@ public:
 
     // TODO: if real clients count > clientsThrPoolCount -> than he can't sent messages
     Server01(int clientsThrPoolCount=10, int clientsSendMsgThrPoolCount = 5):
-            BaseTransmitter(),
+            BlockingServer(),
             clientsThrPool(clientsThrPoolCount),
             clientsSendMessagesThrPool(clientsSendMsgThrPoolCount)
     {

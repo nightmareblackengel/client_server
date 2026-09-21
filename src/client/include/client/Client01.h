@@ -10,7 +10,6 @@
 #include <sstream>
 #include "common/bootstrap.h"
 #include "common/exceptions/Cs01Exception.h"
-#include "common/BaseTransmitter.h"
 #include "common/blocking/BlockingClient.h"
 #include <csignal>
 
