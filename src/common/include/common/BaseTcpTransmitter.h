@@ -7,7 +7,7 @@
 #include <arpa/inet.h>
 #include <vector>
 #include "common/bootstrap.h"
-#include "common/interfaces/RaiiFileDescriptor.h"
+#include "common/interfaces/RaiiBlockingSocket.h"
 
 using std::cout;
 using std::endl;
@@ -20,7 +20,7 @@ class BaseTcpTransmitter
 {
 protected:
     string errorType = "None";
-    RaiiFileDescriptor fileDescriptor;
+    RaiiBlockingSocket bSocket;
 public:
     BaseTcpTransmitter()
     {
@@ -42,7 +42,7 @@ public:
         if (socketId == DEFAULT_INVALID_DESCRIPTOR) {
             this->throwException("Не удалось создать сокет");
         }
-        this->fileDescriptor.setId(socketId);
+        this->bSocket.setId(socketId);
 
         return 0;
     }
@@ -52,7 +52,7 @@ public:
         // Настройка структуры адреса сервера
         sockaddr_in address = this->getConfiguredAddress();
 
-        if (connect(this->fileDescriptor.getId(), (struct sockaddr*) &address, sizeof(address)) == -1) {
+        if (connect(this->bSocket.getId(), (struct sockaddr*) &address, sizeof(address)) == -1) {
             this->throwException("Не удалось подключиться к серверу");
         }
 
@@ -64,10 +64,10 @@ public:
         sockaddr_in address = this->getConfiguredAddress();
         // Проблема быстрого перезапуска сервера
         int opt = 1;
-        setsockopt(this->fileDescriptor.getId(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+        setsockopt(this->bSocket.getId(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
         // Привязываем сокет к адресу и порту (bind)
-        int bindRes = bind(this->fileDescriptor.getId(), (struct sockaddr*)&address, sizeof(address));
+        int bindRes = bind(this->bSocket.getId(), (struct sockaddr*)&address, sizeof(address));
         if (bindRes < 0) {
             throw Cs01Exception("Привязка сокета (bind) завершилась ошибкой");
         }
@@ -79,7 +79,7 @@ public:
     {
         // Переводим сокет в режим прослушивания (listen)
         // 10 - это размер очереди "недообработанных" подключений (backlog)
-        int listenRes = listen(this->fileDescriptor.getId(), requestSize);
+        int listenRes = listen(this->bSocket.getId(), requestSize);
         if (listenRes < 0) {
             throw Cs01Exception("Перевод сокета в режим listen завершился ошибкой");
         }
