@@ -5,7 +5,7 @@
 #include <netinet/in.h>
 #include "common/bootstrap.h"
 #include "common/exceptions/Cs01Exception.h"
-#include "common/interfaces/ISocket.h"
+#include "common/interfaces/RaiiFileDescriptor.h"
 
 using std::cout;
 using std::endl;
@@ -16,7 +16,7 @@ class ServerClient01
 private:
     sockaddr_in addr{};
     socklen_t   addrLen{};
-    ISocket socket;
+    RaiiFileDescriptor socket;
 public:
     ServerClient01()
     {

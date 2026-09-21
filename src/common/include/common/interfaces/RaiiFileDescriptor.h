@@ -8,20 +8,26 @@
 using std::cout;
 using std::endl;
 
-class ISocket
+class RaiiFileDescriptor
 {
 protected:
     int socketId;
 public:
-    ISocket()
+    RaiiFileDescriptor()
     {
         this->socketId = DEFAULT_INVALID_DESCRIPTOR;
     }
 
-    virtual ~ISocket()
+    virtual ~RaiiFileDescriptor()
     {
         this->Close();
     }
+
+    RaiiFileDescriptor(const RaiiFileDescriptor&) = delete;
+    RaiiFileDescriptor& operator=(const RaiiFileDescriptor&) = delete;
+
+    RaiiFileDescriptor(RaiiFileDescriptor&&) = delete;
+    RaiiFileDescriptor& operator=(RaiiFileDescriptor&&) = delete;
 
     int getSocketId()
     {
@@ -34,16 +40,16 @@ public:
 
     int Close()
     {
-        cout << "Закрываем порт [" << this->socketId << "]..." << endl;
+        cout << "Закрываем дескриптор [" << this->socketId << "]..." << endl;
         if (this->socketId == DEFAULT_INVALID_DESCRIPTOR) {
             return 0;
         }
 
         int closeRes = close(this->socketId);
         if (closeRes == 0) {
-            cout << "Порт закрыт [" << this->socketId << "]" << endl;
+            cout << "Дескриптор закрыт [" << this->socketId << "]" << endl;
         } else {
-            cout << IoTextColor::RED << "Порт незакрыт [" << this->socketId << "]. Код ошибки: " << closeRes  << IoTextColor::DEFAULT << endl;
+            cout << IoTextColor::RED << "Дескриптор незакрыт [" << this->socketId << "]. Код ошибки: " << closeRes  << IoTextColor::DEFAULT << endl;
         }
         this->socketId = DEFAULT_INVALID_DESCRIPTOR;
 

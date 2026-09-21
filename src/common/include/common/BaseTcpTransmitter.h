@@ -7,7 +7,7 @@
 #include <arpa/inet.h>
 #include <vector>
 #include "common/bootstrap.h"
-#include "common/interfaces/ISocket.h"
+#include "common/interfaces/RaiiFileDescriptor.h"
 
 using std::cout;
 using std::endl;
@@ -16,13 +16,13 @@ using std::vector;
 const char* SERVER_HOST     = "127.0.0.1";
 const int SERVER_PORT       = 8899;
 
-class BaseTcpTransmitter: public ISocket
+class BaseTcpTransmitter: public RaiiFileDescriptor
 {
 protected:
     string errorType = "None";
 public:
     BaseTcpTransmitter():
-            ISocket()
+            RaiiFileDescriptor()
     {
 
     }
