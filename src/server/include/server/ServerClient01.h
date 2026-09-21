@@ -13,15 +13,13 @@ using std::perror;
 
 class ServerClient01
 {
-private:
-    sockaddr_in addr{};
-    socklen_t   addrLen{};
+protected:
     RaiiSocket socket;
 public:
     ServerClient01()
     {
-        this->addrLen = sizeof(this->addr);
     }
+    // TODO: move to BaseBlocking Transmitter
     // 1. ЗАПРЕЩАЕМ копирование (чтобы случайно не скопировать сокет)
     ServerClient01(const ServerClient01&) = delete;
     ServerClient01& operator=(const ServerClient01&) = delete;
@@ -37,9 +35,13 @@ public:
 
     int acceptFromServer(int serverSocket)
     {
+        sockaddr_in sockAddr{};
+        socklen_t   addrLen = sizeof(sockAddr);
+
         // accept блокирует поток, пока кто-то не подключится
-        int socketId = accept(serverSocket, (struct sockaddr*)&(this->addr), &(this->addrLen));
+        int socketId = accept(serverSocket, (struct sockaddr*)&(sockAddr), &(addrLen));
         if (socketId < 0) {
+            // TODO: change to this->trhowException
             throw Cs01Exception("Не удалось принять подключение (accept)");
         }
         this->socket.setId(socketId);
