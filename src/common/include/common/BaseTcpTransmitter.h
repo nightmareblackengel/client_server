@@ -7,7 +7,7 @@
 #include <arpa/inet.h>
 #include <vector>
 #include "common/bootstrap.h"
-#include "common/interfaces/RaiiBlockingSocket.h"
+#include "common/interfaces/RaiiSocket.h"
 
 using std::cout;
 using std::endl;
@@ -20,7 +20,7 @@ class BaseTcpTransmitter
 {
 protected:
     string errorType = "None";
-    RaiiBlockingSocket bSocket;
+    RaiiSocket bSocket;
 public:
     BaseTcpTransmitter()
     {

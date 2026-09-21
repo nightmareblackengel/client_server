@@ -4,7 +4,7 @@
 
 #include "common/interfaces/RaiiFileDescriptor.h"
 
-class RaiiBlockingSocket: public RaiiFileDescriptor
+class RaiiSocket: public RaiiFileDescriptor
 {
 
 };
