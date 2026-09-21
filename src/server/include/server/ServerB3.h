@@ -81,7 +81,7 @@ public:
         cout << "Ожидание подключения нового клиента (accept)..." << endl;
         int clientId = -1;
         try {
-            clientId = c1->acceptFromServer(this->socketId);
+            clientId = c1->acceptFromServer(this->fileDescriptor.getSocketId());
             this->connectedClients.addClient(clientId, c1);
         } catch(Cs01Exception &ex1) {
             delete c1;
@@ -109,7 +109,7 @@ public:
         // остановим сервер
         // "Больше не передавай и не принимай данные."
         // Но сам файловый дескриптор остается существовать.
-        shutdown(ServerB3::inst->socketId, SHUT_RDWR);
+        shutdown(ServerB3::inst->fileDescriptor.getSocketId(), SHUT_RDWR);
     }
 };
 

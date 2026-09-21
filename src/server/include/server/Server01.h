@@ -56,7 +56,7 @@ public:
         cout << "Ожидание подключения нового клиента (accept)..." << endl;
         int clientId = -1;
         try {
-            clientId = c1->acceptFromServer(this->socketId);
+            clientId = c1->acceptFromServer(this->fileDescriptor.getSocketId());
             this->connectedClients.addClient(clientId, c1);
         } catch(Cs01Exception &ex1) {
             delete c1;
@@ -115,7 +115,7 @@ public:
         // остановим клиентов
         Server01::inst->connectedClients.terminateAnyDataTransmit();
         // остановим сервер
-        shutdown(Server01::inst->socketId, SHUT_RDWR);
+        shutdown(Server01::inst->fileDescriptor.getSocketId(), SHUT_RDWR);
     }
 
     // Регистрируем обработчик для SIGINT (Ctrl+C / кнопка Stop в CLion)
