@@ -41,6 +41,7 @@ public:
             app->registerExitHandlers();
 
             app->createSocket();
+//            app->setFileDescriptorNonBlockFlag(app->getSocketId());
             app->bindSocket();
             app->listenSocket();
 
@@ -48,7 +49,8 @@ public:
                 cout << "Run ..." << endl;
                 sleep(1);
                 // это должно выполнятся вне потока и блокироваться, чтобы не выполнять многократно  acceptNewClient - без наличия клиента
-//                int clientId = app->acceptNewClient();
+                int clientId = app->acceptNewClient();
+                cout << "clientId=[" << clientId << "]" << endl;
 //
 //                app->clientsThrPool.enqueueTask([&app, clientId] {
 //                    app->acceptClientInThread(clientId);
@@ -70,6 +72,24 @@ public:
         }
 
         return 0;
+    }
+
+    int acceptNewClient()
+    {
+        ServerClient01 *c1 = new ServerClient01();
+
+        cout << "Ожидание подключения нового клиента (accept)..." << endl;
+        int clientId = -1;
+        try {
+            clientId = c1->acceptFromServer(this->socketId);
+            this->connectedClients.addClient(clientId, c1);
+        } catch(Cs01Exception &ex1) {
+            delete c1;
+            c1 = nullptr;
+            this->throwException("Не получилось присоединить клиента");
+        }
+
+        return clientId;
     }
 
     // Регистрируем обработчик для SIGINT (Ctrl+C / кнопка Stop в CLion)

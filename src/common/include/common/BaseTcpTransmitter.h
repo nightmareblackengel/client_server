@@ -1,6 +1,7 @@
 #ifndef NBE_CHAT_SERVER_BASETCPTRANSMITTER_H
 #define NBE_CHAT_SERVER_BASETCPTRANSMITTER_H
 
+#include <fcntl.h>
 #include <iostream>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -125,6 +126,25 @@ public:
 
         return address;
     }
+
+    bool setFileDescriptorNonBlockFlag(int fileDescriptor)
+    {
+        // 1. Получаем текущие флаги дескриптора
+        int flags = fcntl(fileDescriptor, F_GETFL, 0);
+        if (flags == -1) {
+            this->throwException("fcntl F_GETFL failed");
+            return false;
+        }
+        // 2. Устанавливаем флаг O_NONBLOCK поверх существующих
+        if (fcntl(fileDescriptor, F_SETFL, flags | O_NONBLOCK) == -1) {
+            this->throwException("fcntl F_SETFL O_NONBLOCK failed");
+            return false;
+        }
+        // TODO: remove
+        cout << "set non block success" << endl;
+        return true;
+    }
+
 
     void throwException(const string &msg, std::source_location loc = std::source_location::current())
     {
