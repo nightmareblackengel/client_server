@@ -7,9 +7,8 @@
 #include <thread>
 #include <atomic>
 #include "common/bootstrap.h"
-#include "server/ServerClient01.h"
 #include "common/exceptions/Cs01Exception.h"
-#include "common/composition/IServerClientList.h"
+#include "ServersClientManager01.h"
 #include "common/composition/MyThreadPool.h"
 #include "common/blocking/BlockingServer.h"
 #include "common/interfaces/LinuxExitHandlers.h"
@@ -27,7 +26,7 @@ using std::chrono::steady_clock;
 class Server01: public BlockingServer, public LinuxExitHandlers<Server01>
 {
 private:
-    IServerClientList connectedClients;
+    ServersClientManager01 connectedClients;
     MyThreadPool clientsThrPool;
     MyThreadPool clientsSendMessagesThrPool;
 public:
@@ -51,7 +50,7 @@ public:
 
     int acceptNewClient()
     {
-        ServerClient01 *c1 = new ServerClient01();
+        BlockingServersClient *c1 = new BlockingServersClient();
 
         cout << "Ожидание подключения нового клиента (accept)..." << endl;
         int clientId = -1;

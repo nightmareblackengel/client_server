@@ -4,21 +4,22 @@
 #include <map>
 #include <mutex>
 #include "common/interfaces/WrapperMutex.h"
+#include "common/blocking/BlockingServersClient.h"
 
 using std::map;
 
-class IServerClientList
+class ServersClientManager01
 {
 private:
-    map<int, ServerClient01*> clientList;
+    map<int, BlockingServersClient*> clientList;
     WrapperMutex wmutexClients;
 public:
-    IServerClientList()
+    ServersClientManager01()
     {
 
     }
 
-    ~IServerClientList()
+    ~ServersClientManager01()
     {
         this->closeAll();
     }
@@ -49,7 +50,7 @@ public:
         this->wmutexClients.unlock();
     }
 
-    void addClient(int clientId, ServerClient01* sClient)
+    void addClient(int clientId, BlockingServersClient* sClient)
     {
         this->wmutexClients.lock();
         this->clientList[clientId] = sClient;
@@ -71,6 +72,7 @@ public:
     void broadcastMessage(int fromSocketId, string& msg)
     {
         this->wmutexClients.lock();
+        // TODO: fix this to vector
         int clientIdList[this->clientList.size()], clientIdsCount = 0, ind1;
         for (auto p1: this->clientList) {
             if (p1.first != fromSocketId) {
@@ -93,7 +95,7 @@ public:
         }
     }
 
-    void freeItem(ServerClient01* &itemToFree)
+    void freeItem(BlockingServersClient* &itemToFree)
     {
         delete itemToFree;
         itemToFree = nullptr;
