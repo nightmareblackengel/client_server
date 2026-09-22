@@ -72,11 +72,12 @@ public:
     void broadcastMessage(int fromSocketId, string& msg)
     {
         this->wmutexClients.lock();
-        // TODO: fix this to vector
-        int clientIdList[this->clientList.size()], clientIdsCount = 0, ind1;
+        vector<int> clientIds(this->clientList.size());
+
+        int clientIdsCount = 0, ind1;
         for (auto p1: this->clientList) {
             if (p1.first != fromSocketId) {
-                clientIdList[clientIdsCount] = p1.first;
+                clientIds[clientIdsCount] = p1.first;
             }
 
             clientIdsCount++;
@@ -86,8 +87,8 @@ public:
         for (ind1 = 0; ind1 < clientIdsCount; ind1++) {
             try {
                 // check it when realize "get message" on client.
-                int res = send(clientIdList[ind1], msg.c_str(), msg.length(), 0);
-                cout << "sending msg to client=[" << clientIdList[ind1] << "] from client=[" << fromSocketId << "]. Result =[" << res << "]" << endl;
+                int res = send(clientIds[ind1], msg.c_str(), msg.length(), 0);
+                cout << "sending msg to client=[" << clientIds[ind1] << "] from client=[" << fromSocketId << "]. Result =[" << res << "]" << endl;
             } catch (...)
             {
                 cout << "MY TMP ERROR" << endl;
