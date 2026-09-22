@@ -3,8 +3,11 @@
 #define NBE_CHAT_BLOCKINGTRANSMITTER_H
 
 #include "common/BaseTransmitter.h"
+#include "common/interfaces/NonCopyableMovable.h"
 
-class BlockingTransmitter: public BaseTransmitter
+class BlockingTransmitter:
+        public BaseTransmitter,
+        public NonCopyableMovable
 {
 public:
     int createSocket() override
