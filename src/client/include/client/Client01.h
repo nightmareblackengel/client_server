@@ -11,7 +11,7 @@
 #include "common/bootstrap.h"
 #include "common/exceptions/Cs01Exception.h"
 #include "common/blocking/BlockingClient.h"
-#include "common/LinuxExitHandlers.h"
+#include "common/interfaces/LinuxExitHandlers.h"
 
 using std::string;
 using std::cout;

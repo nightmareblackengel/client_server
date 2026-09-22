@@ -12,7 +12,7 @@
 #include "common/composition/IServerClientList.h"
 #include "common/composition/MyThreadPool.h"
 #include "common/blocking/BlockingServer.h"
-#include "common/LinuxExitHandlers.h"
+#include "common/interfaces/LinuxExitHandlers.h"
 
 using std::map;
 using std::vector;
