@@ -78,9 +78,8 @@ public:
         for (auto p1: this->clientList) {
             if (p1.first != fromSocketId) {
                 clientIds[clientIdsCount] = p1.first;
+                clientIdsCount++;
             }
-
-            clientIdsCount++;
         }
         this->wmutexClients.unlock();
         ///
