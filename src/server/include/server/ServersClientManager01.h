@@ -3,7 +3,7 @@
 
 #include <map>
 #include <mutex>
-#include "common/interfaces/WrapperMutex.h"
+#include "common/WrapperMutex.h"
 #include "common/blocking/BlockingServersClient.h"
 
 using std::map;
