@@ -41,7 +41,7 @@ public:
             app->registerExitHandlers();
 
             app->createSocket();
-//            app->setFileDescriptorNonBlockFlag(app->bSocket->getId());
+            app->setFileDescriptorNonBlockFlag(app->bSocket.getId());
             app->bindSocket();
             app->listenSocket();
 
