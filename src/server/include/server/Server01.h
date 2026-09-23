@@ -10,7 +10,7 @@
 #include "common/exceptions/Cs01Exception.h"
 #include "ServersClientManager01.h"
 #include "common/MyThreadPool.h"
-#include "common/blocking/BaseServer.h"
+#include "common/transmitter/BaseServer.h"
 #include "common/interfaces/LinuxExitHandlers.h"
 
 using std::map;

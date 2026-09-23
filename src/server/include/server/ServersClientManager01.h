@@ -4,7 +4,7 @@
 #include <map>
 #include <mutex>
 #include "common/WrapperMutex.h"
-#include "common/blocking/BaseServersClient.h"
+#include "common/transmitter/BaseServersClient.h"
 
 using std::map;
 

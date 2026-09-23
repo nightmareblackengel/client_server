@@ -10,7 +10,7 @@
 #include <sstream>
 #include "common/bootstrap.h"
 #include "common/exceptions/Cs01Exception.h"
-#include "common/blocking/BlockingClient.h"
+#include "common/transmitter/BaseClient.h"
 #include "common/interfaces/LinuxExitHandlers.h"
 
 using std::string;
@@ -19,7 +19,7 @@ using std::endl;
 using std::thread;
 using std::atomic;
 
-class Client01: public BlockingClient, public LinuxExitHandlers<Client01>
+class Client01: public BaseClient, public LinuxExitHandlers<Client01>
 {
     atomic<bool> isRun = true;
     thread *sendMessageThr = nullptr;
@@ -27,7 +27,7 @@ class Client01: public BlockingClient, public LinuxExitHandlers<Client01>
 public:
     static Client01 *inst;
 
-    Client01(): BlockingClient()
+    Client01(): BaseClient()
     {
 
     }
