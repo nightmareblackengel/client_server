@@ -1,14 +1,22 @@
 //#include <iostream>
 
-#include "include/server/ServerB3.h"
+//#include "include/server/Server01.h"
+//int main()
+//{
+//    Server01::inst = new Server01();
+//    int ret = Server01::inst->run();
+//
+//    delete Server01::inst;
+//    return ret;
+//}
 
+#include "server/ServerV3.h"
 
 int main()
 {
-    ServerB3::inst = new ServerB3();
-    int ret = ServerB3::inst->run();
+    ServerV3::inst = new ServerV3();
+    int ret = ServerV3::inst->run();
 
-    delete ServerB3::inst;
+    delete ServerV3::inst;
     return ret;
 }
-
