@@ -2,6 +2,7 @@
 #ifndef NBE_CHAT_BASETRANSMITTER_H
 #define NBE_CHAT_BASETRANSMITTER_H
 
+#include <cerrno>
 #include "common/AbstractTransmitter.h"
 #include "common/interfaces/NonCopyableMovable.h"
 
