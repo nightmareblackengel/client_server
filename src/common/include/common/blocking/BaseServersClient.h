@@ -1,10 +1,10 @@
 
-#ifndef NBE_CHAT_BLOCKINGSERVERSCLIENT_H
-#define NBE_CHAT_BLOCKINGSERVERSCLIENT_H
+#ifndef NBE_CHAT_BASESERVERSCLIENT_H
+#define NBE_CHAT_BASESERVERSCLIENT_H
 
-#include "BlockingTransmitter.h"
+#include "BaseTransmitter.h"
 
-class BlockingServersClient: public BlockingTransmitter
+class BaseServersClient: public BaseTransmitter
 {
 public:
     int acceptFromServer(int serverSocket)
@@ -23,4 +23,4 @@ public:
     }
 };
 
-#endif //NBE_CHAT_BLOCKINGSERVERSCLIENT_H
+#endif //NBE_CHAT_BASESERVERSCLIENT_H

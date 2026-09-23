@@ -1,13 +1,13 @@
 
-#ifndef NBE_CHAT_BLOCKINGCLIENT_H
-#define NBE_CHAT_BLOCKINGCLIENT_H
+#ifndef NBE_CHAT_BASECLIENT_H
+#define NBE_CHAT_BASECLIENT_H
 
-#include "BlockingTransmitter.h"
+#include "BaseTransmitter.h"
 
-class BlockingClient: public BlockingTransmitter
+class BaseClient: public BaseTransmitter
 {
 public:
-    BlockingClient(): BlockingTransmitter()
+    BaseClient(): BaseTransmitter()
     {
         this->errorType = CS01_CLIENT_TYPE;
     }
@@ -25,4 +25,4 @@ public:
     }
 };
 
-#endif //NBE_CHAT_BLOCKINGCLIENT_H
+#endif //NBE_CHAT_BASECLIENT_H

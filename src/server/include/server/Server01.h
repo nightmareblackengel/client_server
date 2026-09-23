@@ -10,7 +10,7 @@
 #include "common/exceptions/Cs01Exception.h"
 #include "ServersClientManager01.h"
 #include "common/MyThreadPool.h"
-#include "common/blocking/BlockingServer.h"
+#include "common/blocking/BaseServer.h"
 #include "common/interfaces/LinuxExitHandlers.h"
 
 using std::map;
@@ -23,7 +23,7 @@ using std::atomic;
 using std::to_string;
 using std::chrono::steady_clock;
 
-class Server01: public BlockingServer, public LinuxExitHandlers<Server01>
+class Server01: public BaseServer, public LinuxExitHandlers<Server01>
 {
 private:
     ServersClientManager01 connectedClients;
@@ -35,7 +35,7 @@ public:
 
     // TODO: if real clients count > clientsThrPoolCount -> than he can't sent messages
     Server01(int clientsThrPoolCount=10, int clientsSendMsgThrPoolCount = 5):
-            BlockingServer(),
+            BaseServer(),
             LinuxExitHandlers<Server01>(),
             clientsThrPool(clientsThrPoolCount),
             clientsSendMessagesThrPool(clientsSendMsgThrPoolCount)
@@ -50,7 +50,7 @@ public:
 
     int acceptNewClient()
     {
-        BlockingServersClient *c1 = new BlockingServersClient();
+        BaseServersClient *c1 = new BaseServersClient();
 
         cout << "Ожидание подключения нового клиента (accept)..." << endl;
         int clientId = -1;

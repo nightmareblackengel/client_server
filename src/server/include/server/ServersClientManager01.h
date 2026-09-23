@@ -4,14 +4,14 @@
 #include <map>
 #include <mutex>
 #include "common/WrapperMutex.h"
-#include "common/blocking/BlockingServersClient.h"
+#include "common/blocking/BaseServersClient.h"
 
 using std::map;
 
 class ServersClientManager01
 {
 private:
-    map<int, BlockingServersClient*> clientList;
+    map<int, BaseServersClient*> clientList;
     WrapperMutex wmutexClients;
 public:
     ServersClientManager01()
@@ -50,7 +50,7 @@ public:
         this->wmutexClients.unlock();
     }
 
-    void addClient(int clientId, BlockingServersClient* sClient)
+    void addClient(int clientId, BaseServersClient* sClient)
     {
         this->wmutexClients.lock();
         this->clientList[clientId] = sClient;
@@ -95,7 +95,7 @@ public:
         }
     }
 
-    void freeItem(BlockingServersClient* &itemToFree)
+    void freeItem(BaseServersClient* &itemToFree)
     {
         delete itemToFree;
         itemToFree = nullptr;

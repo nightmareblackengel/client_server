@@ -1,12 +1,12 @@
 
-#ifndef NBE_CHAT_BLOCKINGTRANSMITTER_H
-#define NBE_CHAT_BLOCKINGTRANSMITTER_H
+#ifndef NBE_CHAT_BASETRANSMITTER_H
+#define NBE_CHAT_BASETRANSMITTER_H
 
-#include "common/BaseTransmitter.h"
+#include "common/AbstractTransmitter.h"
 #include "common/interfaces/NonCopyableMovable.h"
 
-class BlockingTransmitter:
-        public BaseTransmitter,
+class BaseTransmitter:
+        public AbstractTransmitter,
         public NonCopyableMovable
 {
 public:
@@ -51,4 +51,4 @@ public:
     }
 };
 
-#endif //NBE_CHAT_BLOCKINGTRANSMITTER_H
+#endif //NBE_CHAT_BASETRANSMITTER_H
