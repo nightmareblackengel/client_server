@@ -9,7 +9,7 @@ class BaseServer: public BaseTransmitter
 public:
     BaseServer(): BaseTransmitter()
     {
-        this->errorType = CS01_SERVER_TYPE;
+
     }
     virtual int bindSocket()
     {
@@ -21,7 +21,7 @@ public:
         // Привязываем сокет к адресу и порту (bind)
         int bindRes = bind(this->bSocket.getId(), (struct sockaddr*)&address, sizeof(address));
         if (bindRes < 0) {
-            this->throwException("Привязка сокета (bind) завершилась ошибкой");
+            AppException::Throw("Привязка сокета (bind) завершилась ошибкой");
         }
 
         return bindRes;
@@ -33,7 +33,7 @@ public:
         // 10 - это размер очереди "недообработанных" подключений (backlog)
         int listenRes = listen(this->bSocket.getId(), requestSize);
         if (listenRes < 0) {
-            this->throwException("Перевод сокета в режим listen завершился ошибкой");
+            AppException::Throw("Перевод сокета в режим listen завершился ошибкой");
         }
 
         return listenRes;

@@ -6,8 +6,8 @@
 #include <arpa/inet.h>
 #include <vector>
 #include "common/bootstrap.h"
-#include "common/exceptions/Cs01Exception.h"
 #include "common/raii/RaiiSocket.h"
+#include "common/static/AppException.h"
 
 using std::cout;
 using std::endl;
@@ -19,7 +19,6 @@ const int SERVER_PORT       = 8899;
 class AbstractTransmitter
 {
 protected:
-    string errorType = "None";
     RaiiSocket bSocket;
 public:
     AbstractTransmitter()
@@ -46,15 +45,10 @@ public:
 
         // Преобразуем строковый IP "127.0.0.1"(SERVER_HOST) в бинарный формат и записываем в структуру
         if (inet_pton(SERVER_IP_TYPE, SERVER_HOST, &address.sin_addr) <= 0) {
-            this->throwException("Неверный IP-адрес или адрес не поддерживается");
+            AppException::Throw("Неверный IP-адрес или адрес не поддерживается");
         }
 
         return address;
-    }
-
-    void throwException(const string &msg, std::source_location loc = std::source_location::current())
-    {
-        throw Cs01Exception(msg, this->errorType, __func__, loc);
     }
 };
 

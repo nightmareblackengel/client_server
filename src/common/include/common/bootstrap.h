@@ -3,11 +3,16 @@
 
 #include <string>
 #include <sys/socket.h>
-
+#include <string_view>
+//
 using std::string;
-
+using std::string_view;
+//
 constexpr const int DEFAULT_INVALID_DESCRIPTOR      = -1;
 constexpr const int SERVER_IP_TYPE                  = AF_INET;
+//
+constexpr const string_view CS01_CLIENT_TYPE = "Client";
+constexpr const string_view CS01_SERVER_TYPE = "Server";
 
 namespace IoTextColor
 {

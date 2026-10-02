@@ -18,7 +18,7 @@ public:
         cout << "ERROR NO=[" << errno << "] equ=[" << (errno == EAGAIN ? "EAGAIN" : "UNK") << "] description=["
             << strerror(errno) << endl;
         if (socketId < 0) {
-            this->throwException("Не удалось принять подключение (accept)");
+            AppException::Throw("Не удалось принять подключение (accept)");
         }
 
         this->bSocket.setId(socketId);

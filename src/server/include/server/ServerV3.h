@@ -8,11 +8,11 @@
 #include <sys/epoll.h>
 
 #include "common/bootstrap.h"
-#include "common/exceptions/Cs01Exception.h"
 #include "ServersClientManager01.h"
 #include "common/MyThreadPool.h"
 #include "common/transmitter/EpollServer.h"
 #include "common/interfaces/LinuxExitHandlers.h"
+#include "common/static/AppException.h"
 
 using std::atomic;
 using std::string;
@@ -27,7 +27,7 @@ public:
 
     ServerV3(): EpollServer()
     {
-        this->errorType = CS01_SERVER_TYPE;
+        AppException::type = CS01_SERVER_TYPE;
     }
 
     ~ServerV3()
@@ -54,18 +54,18 @@ public:
             int epollFd = -1;
             epollFd = epoll_create1(0);
             if (epollFd == -1) {
-                this->throwException("epoll_create1 failed");
+                AppException::Throw("epoll_create1 failed");
                 // Обработка ошибки
             }
             // Регистрация сокета через epoll_ctl и структуру epoll_event
             // Сначала настраивается структура epoll_event:
             struct epoll_event ev{};
-            ev.events = EPOLLIN;     // Интересуют события чтения
-            ev.data.fd = serverId; // Дескриптор сокета, за которым следим
+            ev.events   = EPOLLIN;     // Интересуют события чтения
+            ev.data.fd  = serverId; // Дескриптор сокета, за которым следим
 
             // сокет регистрируется в epoll
             if (epoll_ctl(epollFd, EPOLL_CTL_ADD, serverId, &ev) == -1) {
-                this->throwException("epoll_ctl: serverSocketFd failed");
+                AppException::Throw("epoll_ctl: serverSocketFd failed");
             }
 
             // Системный вызов epoll_wait отправляет поток в сон до тех пор,
@@ -83,7 +83,7 @@ public:
                 if (fdCount == -1) {
                     // Сигнал прервал системный вызов, продолжаем
                     if (errno == EINTR) {
-                        this->throwException("NBE epoll_wait failed. Exiting.");
+                        AppException::Throw("NBE epoll_wait failed. Exiting.");
                         break;
                     }
                 }
@@ -140,7 +140,7 @@ public:
                                 // Удаляем из списка клиентов
                             } else if (errno != EAGAIN && errno != EWOULDBLOCK) {
                                 // Реальная ошибка чтения
-                                this->throwException("NBE recv failed");
+                                AppException::Throw("NBE recv failed");
                                 epoll_ctl(epollFd, EPOLL_CTL_DEL, eventSocketId, nullptr);
                                 close(eventSocketId);
                             }
@@ -161,6 +161,7 @@ public:
             cout << "END OF epoll_create1" << endl;
 // TODO: TEST EPOL
             return 0;
+            // TODO: remove bellow
             while (app->isRun) {
                 cout << "Run ..." << endl;
                 sleep(1);
@@ -174,7 +175,7 @@ public:
                 try {
                     clientId = c1->acceptFromServer(this->bSocket.getId());
 //            this->connectedClients.addClient(clientId, c1);
-                } catch(Cs01Exception &ex1) {
+                } catch(TransmitterException &ex1) {
                     // TODO: add remove in destruct
                     delete c1;
                     c1 = nullptr;
@@ -191,7 +192,7 @@ public:
 //                });
             }
         }
-        catch (Cs01Exception& ex) {
+        catch (TransmitterException& ex) {
             // если ошибка во время оставновки - не показываем
             if (ServerV3::inst->isRun)
             {
@@ -218,10 +219,10 @@ public:
         try {
             clientId = c1->acceptFromServer(this->bSocket.getId());
 //            this->connectedClients.addClient(clientId, c1);
-        } catch(Cs01Exception &ex1) {
+        } catch(TransmitterException &ex1) {
             delete c1;
             c1 = nullptr;
-            this->throwException("Не получилось присоединить клиента");
+            AppException::Throw("Не получилось присоединить клиента");
         }
 
         return clientId;
