@@ -9,7 +9,7 @@ class BaseClient: public BaseTransmitter
 public:
     BaseClient(): BaseTransmitter()
     {
-        this->errorType = CS01_CLIENT_TYPE;
+        AppException::type = CS01_CLIENT_TYPE;
     }
 
     virtual int connectToSocket()
@@ -18,7 +18,7 @@ public:
         sockaddr_in address = this->getConfiguredAddress();
 
         if (connect(this->bSocket.getId(), (struct sockaddr*) &address, sizeof(address)) == -1) {
-            this->throwException("Не удалось подключиться к серверу");
+            AppException::Throw("Не удалось подключиться к серверу");
         }
 
         return 0;
