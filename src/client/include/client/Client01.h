@@ -9,7 +9,6 @@
 #include <string>
 #include <sstream>
 #include "common/bootstrap.h"
-#include "common/exceptions/Cs01Exception.h"
 #include "common/transmitter/BaseClient.h"
 #include "common/interfaces/LinuxExitHandlers.h"
 
@@ -138,7 +137,7 @@ public:
             this->freeGetMsgThread();
             //cout << "JOIN ended" << endl;
         }
-        catch (Cs01Exception& ex) {
+        catch (TransmitterException& ex) {
             cout << IoTextColor::RED <<  "Ошибка:" << ex.toString() << IoTextColor::DEFAULT << endl;
         }
         catch(const char* msg) {
