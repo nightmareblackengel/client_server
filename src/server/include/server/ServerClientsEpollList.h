@@ -1,26 +1,37 @@
-#ifndef NBE_CHAT_SERVER_ISERVERCLIENTLIST_H
-#define NBE_CHAT_SERVER_ISERVERCLIENTLIST_H
 
+#ifndef NBE_CHAT_SERVERCLIENTSEPOLLLIST_H
+#define NBE_CHAT_SERVERCLIENTSEPOLLLIST_H
+
+#include <sys/socket.h>
 #include <map>
 #include <mutex>
+#include <string>
+#include <vector>
+#include <iostream>
+
 #include "common/WrapperMutex.h"
-#include "common/transmitter/BaseServersClient.h"
+#include "common/transmitter/BaseTransmitter.h"
 
 using std::map;
+using std::string;
+using std::vector;
+using std::cout;
+using std::endl;
 
-template<class TBaseServersClient>
-class ServersClientManager01
+class ServerClientsEpollList
 {
 private:
-    map<int, TBaseServersClient*> clientList;
+    map<int, int> clientList;
     WrapperMutex wmutexClients;
+    BaseTransmitter* transmitter;
 public:
-    ServersClientManager01()
+
+    ServerClientsEpollList(BaseTransmitter* _transmitter): transmitter(_transmitter)
     {
 
     }
 
-    ~ServersClientManager01()
+    ~ServerClientsEpollList()
     {
         this->closeAll();
     }
@@ -28,13 +39,6 @@ public:
     void closeAll()
     {
         this->wmutexClients.lock();
-
-        // & -> used for set nullptr to clientLIst item
-        for (auto &item: this->clientList) {
-            if (item.second != nullptr) {
-                this->freeItem(item.second);
-            }
-        }
         this->clientList.clear();
         this->wmutexClients.unlock();
     }
@@ -51,10 +55,10 @@ public:
         this->wmutexClients.unlock();
     }
 
-    void addClient(int clientId, TBaseServersClient* sClient)
+    void addClient(int clientId)
     {
         this->wmutexClients.lock();
-        this->clientList[clientId] = sClient;
+        this->clientList[clientId] = clientId;
         this->wmutexClients.unlock();
     }
 
@@ -63,7 +67,6 @@ public:
         this->wmutexClients.lock();
         auto iterator = this->clientList.find(clientId);
         if (iterator != this->clientList.end()) {
-            this->freeItem(iterator->second);
             this->clientList.erase(clientId);
         }
 
@@ -86,8 +89,7 @@ public:
         ///
         for (ind1 = 0; ind1 < clientIdsCount; ind1++) {
             try {
-                // check it when realize "get message" on client.
-                int res = send(clientIds[ind1], msg.c_str(), msg.length(), 0);
+                int res = this->transmitter->sendStringToSocket(clientIds[ind1], msg);
                 cout << "sending msg to client=[" << clientIds[ind1] << "] from client=[" << fromSocketId << "]. Result =[" << res << "]" << endl;
             } catch (...)
             {
@@ -95,12 +97,6 @@ public:
             }
         }
     }
-
-    void freeItem(TBaseServersClient* &itemToFree)
-    {
-        delete itemToFree;
-        itemToFree = nullptr;
-    }
 };
 
-#endif //NBE_CHAT_SERVER_ISERVERCLIENTLIST_H
+#endif //NBE_CHAT_SERVERCLIENTSEPOLLLIST_H

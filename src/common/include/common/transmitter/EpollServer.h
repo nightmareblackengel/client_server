@@ -21,13 +21,8 @@ public:
 
     ~EpollServer()
     {
-        // TODO: check and remove
-        cout << "~EpollServer(). closing EpollFD" << endl;
         if (this->epollId != DEFAULT_INVALID_DESCRIPTOR) {
-            cout << "closed EpollFD" << endl;
             close(this->epollId);
-        } else {
-            cout << "NOT closed EpollFD" << endl;
         }
     }
 
