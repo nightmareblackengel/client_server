@@ -10,11 +10,11 @@ const int MAX_EPOLL_EVENTS = 64;
 class EpollServer: public Epoll, public NonCopyableMovable
 {
 protected:
-    BaseServer *defServer;
+    BaseServer *tcpServer;
     int epollId;
-    struct epoll_event eEvents[MAX_EPOLL_EVENTS];
+    struct epoll_event events[MAX_EPOLL_EVENTS];
 public:
-    EpollServer(BaseServer *bs): defServer(bs)
+    EpollServer(BaseServer *bs): tcpServer(bs)
     {
         this->epollId = DEFAULT_INVALID_DESCRIPTOR;
     }
@@ -29,6 +29,16 @@ public:
         } else {
             cout << "NOT closed EpollFD" << endl;
         }
+    }
+
+    struct epoll_event* getEvent(int ind)
+    {
+        return &(this->events[ind]);
+    }
+
+    struct epoll_event* getEvents()
+    {
+        return this->events;
     }
 
     int create()
@@ -62,7 +72,7 @@ public:
     {
         // Системный вызов epoll_wait отправляет поток в сон до тех пор,
         // пока ядро Linux не зафиксирует активность хотя бы на одном из зарегистрированных сокетов.
-        return epoll_wait(this->epollId, this->eEvents, MAX_EPOLL_EVENTS, timeout);
+        return epoll_wait(this->epollId, this->events, MAX_EPOLL_EVENTS, timeout);
     }
 
     int addNewClient(int clientSocketId)

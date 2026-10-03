@@ -17,13 +17,13 @@
 using std::atomic;
 using std::string;
 
-class ServerV3:
-        public EpollServer,
-        public LinuxExitHandlers<ServerV3>
+class ServerV3: public LinuxExitHandlers<ServerV3>
 {
 private:
+    // TODO: replace this class to Epoll
     ServersClientManager01 connectedClients;
-    BaseServer tcpServer;
+    BaseServer *tcp;
+    EpollServer *epoll;
 public:
     // TODO: extract EpollServer from
 //    EpollServer epollServer;
@@ -31,25 +31,30 @@ public:
     atomic<bool> isRun = true;
     static ServerV3* inst;
 
-    ServerV3(): EpollServer(&this->tcpServer)
+    ServerV3()
     {
         AppException::type = CS01_SERVER_TYPE;
+        this->tcp   = new BaseServer();
+        this->epoll = new EpollServer(this->tcp);
     }
 
     ~ServerV3()
     {
         this->connectedClients.closeAll();
+
+        delete this->epoll;
+        delete this->tcp;
     }
 
     int createSocketAndListen()
     {
         this->registerExitHandlers();
 
-        this->tcpServer.createSocket();
-        int serverId = this->tcpServer.getSocket()->getId();
-        this->setFileDescriptorNonBlockFlag(serverId);
-        this->tcpServer.bindSocket();
-        this->tcpServer.listenSocket();
+        this->tcp->createSocket();
+        int serverId = this->tcp->getSocket()->getId();
+        this->epoll->setFileDescriptorNonBlockFlag(serverId);
+        this->tcp->bindSocket();
+        this->tcp->listenSocket();
 
         return serverId;
     }
@@ -60,87 +65,88 @@ public:
         ServerV3* app = ServerV3::inst;
         try {
             app->registerExitHandlers();
-            int serverId = this->createSocketAndListen();
+            int serverId = app->createSocketAndListen();
 
 // TODO: TEST EPOL
 
             // Создание epoll-экземпляра
-            app->create();
-            app->configureServerSocket(serverId);
+            app->epoll->create();
+            app->epoll->configureServerSocket(serverId);
             const int bufferSize = 1024*1024;
 
             while(app->isRun) {
-                // TODO: add try
                 cout << "RUN APP" << endl;
                 // Ждем событий от ядра Linux
-                int fdCount = app->waitEvents();
+                int fdCount = app->epoll->waitEvents();
                 if (fdCount == -1) {
                     // Сигнал прервал системный вызов, продолжаем
-                    if (this->checkIsInterrupted(errno)) {
+                    if (app->epoll->checkIsInterrupted(errno)) {
                         AppException::Throw("NBE epoll_wait failed. Exiting.");
                         break;
                     }
                 }
-                // TODO: EPOLL Refactoring next part!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 // Обходим все сокеты, на которых что-то произошло
                 for (int ind1 = 0; ind1 < fdCount; ind1++) {
-                    // TODO: add try catch
-                    int eventSocketId = eEvents[ind1].data.fd;
-                    // Событие произошло на слушающем сокете сервера -> Новое подключение!
-                    if (eventSocketId == serverId) {
-                        int newClientId = this->defServer->acceptNewClient(serverId);
-                        // Переводим сокет нового клиента в НЕБЛОКИРУЮЩИЙ режим!
-                        this->setFileDescriptorNonBlockFlag(newClientId);
-                        app->addNewClient(newClientId);
+                    int eventSocketId = app->epoll->getEvent(ind1)->data.fd;
+                    try {
+                        // Событие произошло на слушающем сокете сервера -> Новое подключение!
+                        if (eventSocketId == serverId) {
+                            int newClientId = app->tcp->acceptNewClient(serverId);
+                            // Переводим сокет нового клиента в НЕБЛОКИРУЮЩИЙ режим!
+                            app->epoll->setFileDescriptorNonBlockFlag(newClientId);
+                            app->epoll->addNewClient(newClientId);
 
-                        cout << "Новый клиент подключен: FD=[" << newClientId << "]" << endl;
-                        // todo: MyServerClients Добавляем clientFd в свой список/мапу клиентов
-                    }
-                    // Событие на сокете существующего клиента -> Пришли данные или отключение
-                    else {
-                        // Проверяем на отключение (EPOLLRDHUP) или ошибку
-                        if (this->isClientDisconnectedEvent(eEvents[ind1].events)) {
-                            std::cout << "Клиент отключился: FD [" << eventSocketId << "]" << std::endl;
-                            // Удаляем из epoll и закрываем
-                            this->removeClient(eventSocketId);
-
-                            close(eventSocketId);
-                            // TODO: MyServerClients Удаляем из своего списка клиентов
-                            continue;
+                            cout << "Новый клиент подключен: FD=[" << newClientId << "]" << endl;
+                            // todo: MyServerClients Добавляем clientFd в свой список/мапу клиентов
                         }
-                        // Данные готовы для чтения (EPOLLIN)
-                        if (this->isClientReadyToRecieve(eEvents[ind1].events)) {
-                            char buffer[bufferSize];
-                            // TODO: move to default server
-                            ssize_t bytesRead = this->tcpServer.simpleReceive(eventSocketId, buffer, sizeof(buffer) - 1, 0);
-                            if (bytesRead > 0) {
-                                std::cout << "Получено от FD " << eventSocketId << ": " << buffer << endl;
-                                // Делаем бродкаст всем остальным клиентам
-                                // TODO: MyServerClients
-                                // broadcastMessage(buffer, currentFd);
-                            }
-                            else if (bytesRead == 0) {
-                                buffer[bytesRead] = '\0';
-                                // Клиент закрыл соединение
-                                this->removeClient(eventSocketId);
-                                close(eventSocketId);
-                                // TODO: MyServerClients Удаляем из списка клиентов
-                            } else if (this->checkIsFatalError(errno)) {
-                                this->removeClient(eventSocketId);
-                                // TODO: MyServerClients Удаляем из списка клиентов
-                                close(eventSocketId);
+                        // Событие на сокете существующего клиента -> Пришли данные или отключение
+                        else {
+                            // Проверяем на отключение (EPOLLRDHUP) или ошибку
+                            if (app->epoll->isClientDisconnectedEvent(app->epoll->getEvent(ind1)->events)) {
+                                std::cout << "Клиент отключился: FD [" << eventSocketId << "]" << std::endl;
+                                // Удаляем из epoll и закрываем
+                                app->epoll->removeClient(eventSocketId);
 
-                                // Реальная ошибка чтения
-                                AppException::Throw("NBE recv failed");
+                                close(eventSocketId);
+                                // TODO: MyServerClients Удаляем из своего списка клиентов
+                                continue;
                             }
-                        } else {
-                            // TODO: output unparsed events
-                            cout << "NBE UNPROCESSED error. events=[" << eEvents[ind1].events << "]" << endl;
+                            // Данные готовы для чтения (EPOLLIN)
+                            if (app->epoll->isClientReadyToRecieve(app->epoll->getEvent(ind1)->events)) {
+                                char buffer[bufferSize];
+
+                                ssize_t bytesRead = app->tcp->simpleReceive(eventSocketId, buffer, sizeof(buffer) - 1, 0);
+                                if (bytesRead > 0) {
+                                    std::cout << "Получено от FD " << eventSocketId << ": " << buffer << endl;
+                                    // Делаем бродкаст всем остальным клиентам
+                                    // TODO: MyServerClients
+                                    // broadcastMessage(buffer, currentFd);
+                                }
+                                else if (bytesRead == 0) {
+                                    buffer[bytesRead] = '\0';
+                                    // Клиент закрыл соединение
+                                    app->epoll->removeClient(eventSocketId);
+                                    close(eventSocketId);
+                                    // TODO: MyServerClients Удаляем из списка клиентов
+                                } else if (app->epoll->checkIsFatalError(errno)) {
+                                    app->epoll->removeClient(eventSocketId);
+                                    // TODO: MyServerClients Удаляем из списка клиентов
+                                    close(eventSocketId);
+
+                                    // Реальная ошибка чтения
+                                    AppException::Throw("NBE recv failed");
+                                }
+                            } else {
+                                // TODO: output unparsed events
+                                cout << "NBE UNPROCESSED error. events=[" << app->epoll->getEvent(ind1)->events << "]" << endl;
+                            }
                         }
+                    } catch (TransmitterException &ex) {
+                        cout << "Error, when eventId = [" << eventSocketId << "]"
+                            << endl << "Error description=[" << ex.toString() << endl;
                     }
                 }
             }
-// TODO:002
 
             cout << "END OF epoll_create1" << endl;
 // TODO: TEST EPOL
@@ -157,7 +163,7 @@ public:
                 cout << "Ожидание подключения нового клиента (accept)..." << endl;
                 int clientId = -1;
                 try {
-                    clientId = c1->acceptFromServer(this->tcpServer.getSocket()->getId());
+                    clientId = c1->acceptFromServer(this->tcp->getSocket()->getId());
 //            this->connectedClients.addClient(clientId, c1);
                 } catch(TransmitterException &ex1) {
                     // TODO: add remove in destruct
@@ -229,7 +235,7 @@ public:
         // остановим сервер
         // "Больше не передавай и не принимай данные."
         // Но сам файловый дескриптор остается существовать.
-        shutdown(ServerV3::inst->tcpServer.getSocket()->getId(), SHUT_RDWR);
+        shutdown(ServerV3::inst->tcp->getSocket()->getId(), SHUT_RDWR);
     }
 };
 
