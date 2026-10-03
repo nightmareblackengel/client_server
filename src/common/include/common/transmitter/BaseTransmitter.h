@@ -35,13 +35,18 @@ public:
         return res;
     }
 
+    ssize_t simpleReceive(int socketId, char* buffer, size_t bufferSize, int flags = 0)
+    {
+        return recv(socketId, buffer, bufferSize, flags);
+    }
+
     string readFromSocket(int socketId, ssize_t& countRes) override
     {
         vector<char> buff(65536);
 
         // recv() читает данные из сокета клиента.
         // Он тоже блокирующий: ждет, пока клиент что-то пришлет.
-        countRes = recv(socketId, buff.data(), buff.size() - 1, 0);
+        countRes = this->simpleReceive(socketId, buff.data(), buff.size() - 1, 0);
         if (countRes < 0) {
             AppException::Throw("Ошибка при чтении данных (recv)");
         }
