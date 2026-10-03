@@ -50,6 +50,19 @@ public:
 
         return result;
     }
+
+    int acceptNewClient(int serverSocketId)
+    {
+        sockaddr_in sockAddr{};
+        socklen_t   addrLen = sizeof(sockAddr);
+
+        int clientSocketId = accept(serverSocketId, (struct sockaddr*)&(sockAddr), &(addrLen));
+        if (clientSocketId < 0) {
+            AppException::Throw("Не удалось принять подключение (accept)");
+        }
+
+        return clientSocketId;
+    }
 };
 
 #endif //NBE_CHAT_BASETRANSMITTER_H

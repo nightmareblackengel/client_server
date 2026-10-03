@@ -36,6 +36,11 @@ public:
     virtual int sendStringToSocket(int socketId, string& msg) = 0;
     virtual string readFromSocket(int socketId, ssize_t& countRes) = 0;
 
+    RaiiSocket* getSocket()
+    {
+        return &(this->bSocket);
+    }
+
     sockaddr_in getConfiguredAddress()
     {
         // Настройка структуры адреса сервера

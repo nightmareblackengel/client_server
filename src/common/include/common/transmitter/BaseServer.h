@@ -11,7 +11,8 @@ public:
     {
 
     }
-    virtual int bindSocket()
+
+    int bindSocket()
     {
         sockaddr_in address = this->getConfiguredAddress();
         // Проблема быстрого перезапуска сервера
@@ -27,7 +28,7 @@ public:
         return bindRes;
     }
 
-    virtual int listenSocket(int requestSize = 10)
+    int listenSocket(int requestSize = 10)
     {
         // Переводим сокет в режим прослушивания (listen)
         // 10 - это размер очереди "недообработанных" подключений (backlog)
