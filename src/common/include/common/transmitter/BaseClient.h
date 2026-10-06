@@ -9,7 +9,6 @@ class BaseClient: public BaseTransmitter
 public:
     BaseClient(): BaseTransmitter()
     {
-        AppException::type = CS01_CLIENT_TYPE;
     }
 
     virtual int connectToSocket()

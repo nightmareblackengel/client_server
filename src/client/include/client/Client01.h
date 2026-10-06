@@ -28,7 +28,7 @@ public:
 
     Client01(): BaseClient()
     {
-
+        AppException::type = CS01_CLIENT_TYPE;
     }
 
     ~Client01()
@@ -80,7 +80,6 @@ public:
             cout << "Введите сообщение для отправки:" << endl;
             string newLine;
             std::getline(std::cin, newLine);
-//            cout << "after getline position" << endl;
             // если сообщение пустое - будет считаться как выход
             if (newLine.empty()) {
                 app->setIsRun(false);
@@ -88,27 +87,30 @@ public:
             }
             int sendRes = app->sendStringToSocket(this->bSocket.getId(), newLine);
         }
+        // terminate "nextdoor" thread
+        this->terminateDataInSocket(this->getSocketId());
 
         return;
     }
 
     void getMessageFromHandler()
     {
-        // TODO: send message to closed client
         Client01 *app = this->inst;
 
         std::stringstream threadStream;
         threadStream << "В потоке=[" <<  std::this_thread::get_id() << "] ";
         ssize_t readLenRes = 0;
         int socketId = app->bSocket.getId();
-        while (app->getIsRun() == true) {
+        while (app->getIsRun()) {
             string readMessage = Client01::readFromSocket(socketId, readLenRes);
             if (!readMessage.empty()) {
                 cout << threadStream.str() << "клиент отправил сообщение:" << endl;
                 cout << threadStream.str() << IoTextColor::CYAN << readMessage << IoTextColor::DEFAULT << endl;
                 cout << threadStream.str() << "----------------------------------------" << endl;
             } else {
-                cout << IoTextColor::RED << "ОШИБКА. Сообщение содержит пустую строку " << IoTextColor::DEFAULT << endl;
+                if (app->getIsRun()) {
+                    cout << IoTextColor::RED << "ОШИБКА. Сообщение содержит пустую строку " << IoTextColor::DEFAULT << endl;
+                }
             }
         }
     }
@@ -135,7 +137,6 @@ public:
 
             this->freeSendMsgThread();
             this->freeGetMsgThread();
-            //cout << "JOIN ended" << endl;
         }
         catch (TransmitterException& ex) {
             cout << IoTextColor::RED <<  "Ошибка:" << ex.toString() << IoTextColor::DEFAULT << endl;
@@ -148,7 +149,7 @@ public:
         }
         //cout << "RUN ENDED ...."<< endl;
     }
-
+    // будет запущено только лишь в случае остановки программы
     static void runExitHandlers(int signum)
     {
         if (Client01::inst == nullptr) {
@@ -157,20 +158,15 @@ public:
         cout << "[Signal] Получен сигнал " << signum << ". Инициируем вежливую остановку..." << endl;
         Client01::inst->setIsRun(false);
 
+        Client01::inst->terminateDataInSocket(Client01::inst->getSocketId());
+
         // в той ситуации когда пользователь захотел закрыть программу можно
         // Закрыть stdin
         // getline() -> получит EOF.
         // Но это грубый способ — после него консоль уже не работает.
 //        cout << "console stop started..." << endl;
-        // not work
+        // TODO: code not work
         close(STDIN_FILENO);
-//        cout << "console stop ended..." << endl;
-
-        // TODO: remove if not use
-        // "Больше не передавай и не принимай данные."
-        // Но сам файловый дескриптор остается существовать.
-        // shutdown(item.first, SHUT_RDWR);
-//        cout << "cant stop the code" << endl;
     }
 };
 
