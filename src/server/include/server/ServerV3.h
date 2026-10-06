@@ -64,8 +64,6 @@ public:
             app->registerExitHandlers();
             int serverId = app->createSocketAndListen();
 
-// TODO: TEST EPOL
-
             // Создание epoll-экземпляра
             app->epoll->create();
             app->epoll->configureServerSocket(serverId);
@@ -87,14 +85,11 @@ public:
                     try {
                         // Событие произошло на слушающем сокете сервера -> Новое подключение!
                         if (eventSocketId == serverId) {
-                            // TODO refactor this from tcpServer to ClientServerManager
-                            int newClientId = app->tcp->acceptNewClient(serverId);
+                            int newClientId = this->connectedClients->acceptNewClient(serverId);
                             // Переводим сокет нового клиента в НЕБЛОКИРУЮЩИЙ режим!
                             app->epoll->setFileDescriptorNonBlockFlag(newClientId);
                             app->epoll->addNewClient(newClientId);
-
                             cout << "Новый клиент подключен: FD=[" << newClientId << "]" << endl;
-                            this->connectedClients->addClient(newClientId);
                         }
                         // Событие на сокете существующего клиента -> Пришли данные или отключение
                         else {
@@ -103,8 +98,6 @@ public:
                                 std::cout << "Клиент отключился: FD [" << eventSocketId << "]" << std::endl;
                                 // Удаляем из epoll и закрываем
                                 app->epoll->removeClient(eventSocketId);
-                                // TODO: remove all close from threre
-                                close(eventSocketId);
                                 this->connectedClients->remove(eventSocketId);
                                 continue;
                             }
@@ -122,15 +115,10 @@ public:
                                 else if (bytesRead == 0) {
                                     // Клиент закрыл соединение
                                     app->epoll->removeClient(eventSocketId);
-                                    // TODO: move from there
-                                    close(eventSocketId);
                                     this->connectedClients->remove(eventSocketId);
                                 } else if (app->epoll->checkIsFatalError(errno)) {
                                     app->epoll->removeClient(eventSocketId);
-                                    // TODO: MyServerClients Удаляем из списка клиентов
-                                    close(eventSocketId);
                                     this->connectedClients->remove(eventSocketId);
-
                                     // Реальная ошибка чтения
                                     AppException::Throw("NBE recv failed");
                                 }
@@ -145,9 +133,6 @@ public:
                     }
                 }
             }
-
-            cout << "END OF epoll_create1" << endl;
-// TODO: TEST EPOL
         }
         catch (TransmitterException& ex) {
             // если ошибка во время оставновки - не показываем
@@ -190,6 +175,6 @@ public:
 
 ServerV3* ServerV3::inst = nullptr;
 // TODO:
-// 4. add new client-server-v03
-
+// 6. check add ServerClientsEpollList
+// 7. add fix for empty message to stop the client app.
 #endif //NBE_CHAT_SERVERB3_H

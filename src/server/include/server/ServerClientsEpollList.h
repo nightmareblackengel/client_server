@@ -21,12 +21,11 @@ using std::endl;
 class ServerClientsEpollList
 {
 private:
-    map<int, int> clientList;
+    map<int, RaiiSocket*> clientList;
     WrapperMutex wmutexClients;
-    BaseTransmitter* transmitter;
+    BaseTransmitter* tcp;
 public:
-
-    ServerClientsEpollList(BaseTransmitter* _transmitter): transmitter(_transmitter)
+    ServerClientsEpollList(BaseTransmitter* _t): tcp(_t)
     {
 
     }
@@ -39,26 +38,21 @@ public:
     void closeAll()
     {
         this->wmutexClients.lock();
+
+        // & -> used for set nullptr to clientLIst item
+        for (auto &item: this->clientList) {
+            if (item.second != nullptr) {
+                this->freeItem(item.second);
+            }
+        }
         this->clientList.clear();
         this->wmutexClients.unlock();
     }
 
-    // используется для принудительное остановки "блокируемых" функций при передаче данных (recv, send....)
-    void terminateAnyDataTransmit()
+    void addClient(int clientId, RaiiSocket* sClient)
     {
         this->wmutexClients.lock();
-        for (auto &item : this->clientList){
-            // "Больше не передавай и не принимай данные."
-            // Но сам файловый дескриптор остается существовать.
-            shutdown(item.first, SHUT_RDWR);
-        }
-        this->wmutexClients.unlock();
-    }
-
-    void addClient(int clientId)
-    {
-        this->wmutexClients.lock();
-        this->clientList[clientId] = clientId;
+        this->clientList[clientId] = sClient;
         this->wmutexClients.unlock();
     }
 
@@ -67,9 +61,39 @@ public:
         this->wmutexClients.lock();
         auto iterator = this->clientList.find(clientId);
         if (iterator != this->clientList.end()) {
+            this->freeItem(iterator->second);
             this->clientList.erase(clientId);
         }
 
+        this->wmutexClients.unlock();
+    }
+
+    void freeItem(RaiiSocket* &itemToFree)
+    {
+        delete itemToFree;
+        itemToFree = nullptr;
+    }
+
+    int acceptNewClient(int serverSocketId)
+    {
+        int newClientId = this->tcp->acceptNewClient(serverSocketId);
+        if (newClientId >= 0) {
+            RaiiSocket *newSocket = new RaiiSocket(newClientId);
+            // TODO: check when run desctructor for newSocket
+            cout << "created new RAIISOCKET = [" << newClientId << "]" << endl;
+            this->addClient(newClientId, newSocket);
+        }
+
+        return newClientId;
+    }
+
+    // используется для принудительное остановки "блокируемых" функций при передаче данных (recv, send....)
+    void terminateAnyDataTransmit()
+    {
+        this->wmutexClients.lock();
+        for (auto &item : this->clientList){
+            this->tcp->terminateDataInSocket(item.first);
+        }
         this->wmutexClients.unlock();
     }
 
@@ -79,9 +103,9 @@ public:
         vector<int> clientIds(this->clientList.size());
 
         int clientIdsCount = 0, ind1;
-        for (auto p1: this->clientList) {
-            if (p1.first != fromSocketId) {
-                clientIds[clientIdsCount] = p1.first;
+        for (auto &client: this->clientList) {
+            if (client.first != fromSocketId) {
+                clientIds[clientIdsCount] = client.first;
                 clientIdsCount++;
             }
         }
@@ -89,7 +113,7 @@ public:
         ///
         for (ind1 = 0; ind1 < clientIdsCount; ind1++) {
             try {
-                int res = this->transmitter->sendStringToSocket(clientIds[ind1], msg);
+                int res = this->tcp->sendStringToSocket(clientIds[ind1], msg);
                 cout << "sending msg to client=[" << clientIds[ind1] << "] from client=[" << fromSocketId << "]. Result =[" << res << "]" << endl;
             } catch (...)
             {

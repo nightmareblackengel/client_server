@@ -65,6 +65,17 @@ public:
         itemToFree = nullptr;
     }
 
+//    int acceptNewClient(int serverSocketId)
+//    {
+//        int newClientId = this->tcp->acceptNewClient(serverSocketId);
+//        if (newClientId >= 0) {
+//            RaiiSocket newSocket(newClientId);
+//            this->addClient(newClientId, &newSocket);
+//        }
+//
+//        return newClientId;
+//    }
+
     // используется для принудительное остановки "блокируемых" функций при передаче данных (recv, send....)
     void terminateAnyDataTransmit()
     {
