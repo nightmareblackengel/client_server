@@ -68,6 +68,13 @@ public:
 
         return clientSocketId;
     }
+
+    // "Больше не передавай и не принимай данные."
+    // Но сам файловый дескриптор остается существовать.
+    int terminateDataInSocket(int socketId)
+    {
+        return shutdown(socketId, SHUT_RDWR);
+    }
 };
 
 #endif //NBE_CHAT_BASETRANSMITTER_H

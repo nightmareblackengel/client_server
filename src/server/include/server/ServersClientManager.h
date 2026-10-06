@@ -9,18 +9,19 @@
 using std::map;
 
 template<class TBaseServersClient>
-class ServersClientManager01
+class ServersClientManager
 {
 private:
     map<int, TBaseServersClient*> clientList;
     WrapperMutex wmutexClients;
+    BaseTransmitter* tcp;
 public:
-    ServersClientManager01()
+    ServersClientManager(BaseTransmitter* _t): tcp(_t)
     {
 
     }
 
-    ~ServersClientManager01()
+    ~ServersClientManager()
     {
         this->closeAll();
     }
@@ -36,18 +37,6 @@ public:
             }
         }
         this->clientList.clear();
-        this->wmutexClients.unlock();
-    }
-
-    // используется для принудительное остановки "блокируемых" функций при передаче данных (recv, send....)
-    void terminateAnyDataTransmit()
-    {
-        this->wmutexClients.lock();
-        for (auto &item : this->clientList){
-            // "Больше не передавай и не принимай данные."
-            // Но сам файловый дескриптор остается существовать.
-            shutdown(item.first, SHUT_RDWR);
-        }
         this->wmutexClients.unlock();
     }
 
@@ -70,6 +59,22 @@ public:
         this->wmutexClients.unlock();
     }
 
+    void freeItem(TBaseServersClient* &itemToFree)
+    {
+        delete itemToFree;
+        itemToFree = nullptr;
+    }
+
+    // используется для принудительное остановки "блокируемых" функций при передаче данных (recv, send....)
+    void terminateAnyDataTransmit()
+    {
+        this->wmutexClients.lock();
+        for (auto &item : this->clientList){
+            this->tcp->terminateDataInSocket(item.first);
+        }
+        this->wmutexClients.unlock();
+    }
+
     void broadcastMessage(int fromSocketId, string& msg)
     {
         this->wmutexClients.lock();
@@ -86,20 +91,13 @@ public:
         ///
         for (ind1 = 0; ind1 < clientIdsCount; ind1++) {
             try {
-                // check it when realize "get message" on client.
-                int res = send(clientIds[ind1], msg.c_str(), msg.length(), 0);
+                int res = this->tcp->sendStringToSocket(clientIds[ind1], msg);
                 cout << "sending msg to client=[" << clientIds[ind1] << "] from client=[" << fromSocketId << "]. Result =[" << res << "]" << endl;
             } catch (...)
             {
                 cout << "MY TMP ERROR" << endl;
             }
         }
-    }
-
-    void freeItem(TBaseServersClient* &itemToFree)
-    {
-        delete itemToFree;
-        itemToFree = nullptr;
     }
 };
 
