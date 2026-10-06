@@ -169,12 +169,11 @@ public:
         // остановим сервер
         // "Больше не передавай и не принимай данные."
         // Но сам файловый дескриптор остается существовать.
-        shutdown(ServerV3::inst->tcp->getSocketId(), SHUT_RDWR);
+        ServerV3::inst->tcp->terminateDataInSocket(ServerV3::inst->tcp->getSocketId());
     }
 };
 
 ServerV3* ServerV3::inst = nullptr;
 // TODO:
-// 6. check add ServerClientsEpollList
 // 7. add fix for empty message to stop the client app.
 #endif //NBE_CHAT_SERVERB3_H
