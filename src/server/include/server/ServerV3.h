@@ -8,7 +8,6 @@
 #include <sys/epoll.h>
 
 #include "common/bootstrap.h"
-#include "ServersClientManager01.h"
 #include "common/MyThreadPool.h"
 #include "common/transmitter/EpollServer.h"
 #include "common/interfaces/LinuxExitHandlers.h"
@@ -49,7 +48,7 @@ public:
         this->registerExitHandlers();
 
         this->tcp->createSocket();
-        int serverId = this->tcp->getSocket()->getId();
+        int serverId = this->tcp->getSocketId();
         this->epoll->setFileDescriptorNonBlockFlag(serverId);
         this->tcp->bindSocket();
         this->tcp->listenSocket();
@@ -88,6 +87,7 @@ public:
                     try {
                         // Событие произошло на слушающем сокете сервера -> Новое подключение!
                         if (eventSocketId == serverId) {
+                            // TODO refactor this from tcpServer to ClientServerManager
                             int newClientId = app->tcp->acceptNewClient(serverId);
                             // Переводим сокет нового клиента в НЕБЛОКИРУЮЩИЙ режим!
                             app->epoll->setFileDescriptorNonBlockFlag(newClientId);
@@ -184,7 +184,7 @@ public:
         // остановим сервер
         // "Больше не передавай и не принимай данные."
         // Но сам файловый дескриптор остается существовать.
-        shutdown(ServerV3::inst->tcp->getSocket()->getId(), SHUT_RDWR);
+        shutdown(ServerV3::inst->tcp->getSocketId(), SHUT_RDWR);
     }
 };
 

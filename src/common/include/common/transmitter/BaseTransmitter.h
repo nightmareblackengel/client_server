@@ -21,7 +21,7 @@ public:
         if (socketId == DEFAULT_INVALID_DESCRIPTOR) {
             AppException::Throw("Не удалось создать сокет");
         }
-        this->bSocket.setId(socketId);
+        this->setSocketId(socketId);
 
         return 0;
     }

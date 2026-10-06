@@ -17,7 +17,7 @@ public:
         // Настройка структуры адреса сервера
         sockaddr_in address = this->getConfiguredAddress();
 
-        if (connect(this->bSocket.getId(), (struct sockaddr*) &address, sizeof(address)) == -1) {
+        if (connect(this->getSocketId(), (struct sockaddr*) &address, sizeof(address)) == -1) {
             AppException::Throw("Не удалось подключиться к серверу");
         }
 

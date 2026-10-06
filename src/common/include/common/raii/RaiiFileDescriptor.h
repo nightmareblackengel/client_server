@@ -13,9 +13,9 @@ class RaiiFileDescriptor
 protected:
     int identificator;
 public:
-    RaiiFileDescriptor()
+    RaiiFileDescriptor(int _id = DEFAULT_INVALID_DESCRIPTOR)
     {
-        this->identificator = DEFAULT_INVALID_DESCRIPTOR;
+        this->identificator = _id;
     }
 
     virtual ~RaiiFileDescriptor()

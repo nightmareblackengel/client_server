@@ -11,7 +11,7 @@ public:
     {
         int socketId = this->acceptNewClient(serverSocket);
 
-        this->bSocket.setId(socketId);
+        this->setSocketId(socketId);
         cout << "ServersClient успешно подключился! Дескриптор клиента: " << socketId << endl;
         return socketId;
     }

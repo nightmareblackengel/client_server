@@ -36,9 +36,13 @@ public:
     virtual int sendStringToSocket(int socketId, string& msg) = 0;
     virtual string readFromSocket(int socketId, ssize_t& countRes) = 0;
 
-    RaiiSocket* getSocket()
+    int getSocketId()
     {
-        return &(this->bSocket);
+        return this->bSocket.getId();
+    }
+    void setSocketId(int _id)
+    {
+        this->bSocket.setId(_id);
     }
 
     sockaddr_in getConfiguredAddress()
