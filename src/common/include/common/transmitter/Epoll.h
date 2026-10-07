@@ -20,8 +20,6 @@ public:
             AppException::Throw("fcntl F_SETFL O_NONBLOCK failed");
             return false;
         }
-        // TODO: remove
-        cout << "set non block success" << endl;
         return true;
     }
 };

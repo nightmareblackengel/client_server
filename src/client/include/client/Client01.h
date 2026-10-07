@@ -110,6 +110,8 @@ public:
             } else {
                 if (app->getIsRun()) {
                     cout << IoTextColor::RED << "ОШИБКА. Сообщение содержит пустую строку " << IoTextColor::DEFAULT << endl;
+                    // если сервер прислал пустую строку - то сервер остановлен.
+                    app->setIsRun(false);
                 }
             }
         }
