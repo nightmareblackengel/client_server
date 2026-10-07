@@ -88,13 +88,14 @@ public:
     }
 
     // используется для принудительное остановки "блокируемых" функций при передаче данных (recv, send....)
+    // из-за вызова из signal - мьютексы убираем
     void terminateAnyDataTransmit()
     {
-        this->wmutexClients.lock();
+//        this->wmutexClients.lock();
         for (auto &item : this->clientList){
             this->tcp->terminateDataInSocket(item.first);
         }
-        this->wmutexClients.unlock();
+//        this->wmutexClients.unlock();
     }
 
     void broadcastMessage(int fromSocketId, string& msg)

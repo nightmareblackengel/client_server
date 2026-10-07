@@ -158,9 +158,6 @@ public:
     {
         cout << "[Signal] Получен сигнал " << signum << ". Инициируем вежливую остановку..." << endl;
         ServerV3::inst->isRun = false;
-
-        // TODO: check locks
-
         // остановим клиентов
         ServerV3::inst->connectedClients->terminateAnyDataTransmit();
         // остановим сервер
