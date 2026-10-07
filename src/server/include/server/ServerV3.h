@@ -158,12 +158,6 @@ public:
     {
         cout << "[Signal] Получен сигнал " << signum << ". Инициируем вежливую остановку..." << endl;
         ServerV3::inst->isRun = false;
-        // остановим клиентов
-        ServerV3::inst->connectedClients->terminateAnyDataTransmit();
-        // остановим сервер
-        // "Больше не передавай и не принимай данные."
-        // Но сам файловый дескриптор остается существовать.
-        ServerV3::inst->tcp->terminateDataInSocket(ServerV3::inst->tcp->getSocketId());
     }
 };
 

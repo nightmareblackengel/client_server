@@ -79,23 +79,10 @@ public:
         int newClientId = this->tcp->acceptNewClient(serverSocketId);
         if (newClientId >= 0) {
             RaiiSocket *newSocket = new RaiiSocket(newClientId);
-            // TODO: check when run desctructor for newSocket
-            cout << "created new RAIISOCKET = [" << newClientId << "]" << endl;
             this->addClient(newClientId, newSocket);
         }
 
         return newClientId;
-    }
-
-    // используется для принудительное остановки "блокируемых" функций при передаче данных (recv, send....)
-    // из-за вызова из signal - мьютексы убираем
-    void terminateAnyDataTransmit()
-    {
-//        this->wmutexClients.lock();
-        for (auto &item : this->clientList){
-            this->tcp->terminateDataInSocket(item.first);
-        }
-//        this->wmutexClients.unlock();
     }
 
     void broadcastMessage(int fromSocketId, string& msg)
