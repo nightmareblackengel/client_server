@@ -8,7 +8,6 @@
 #include <sys/epoll.h>
 
 #include "common/bootstrap.h"
-#include "common/MyThreadPool.h"
 #include "common/transmitter/EpollServer.h"
 #include "common/interfaces/LinuxExitHandlers.h"
 #include "common/static/AppException.h"
@@ -45,8 +44,6 @@ public:
 
     int createSocketAndListen()
     {
-        this->registerExitHandlers();
-
         this->tcp->createSocket();
         int serverId = this->tcp->getSocketId();
         this->epoll->setFileDescriptorNonBlockFlag(serverId);
@@ -73,7 +70,6 @@ public:
                 // Ждем событий от ядра Linux
                 int fdCount = app->epoll->waitEvents();
                 if (fdCount == -1) {
-                    // Сигнал прервал системный вызов, продолжаем
                     if (app->epoll->checkIsInterrupted(errno)) {
                         AppException::Throw("NBE epoll_wait failed. Exiting.");
                         break;
@@ -160,9 +156,10 @@ public:
     }
     static void runExitHandlers(int signum)
     {
-        // TODO: ??? need?? and check
         cout << "[Signal] Получен сигнал " << signum << ". Инициируем вежливую остановку..." << endl;
         ServerV3::inst->isRun = false;
+
+        // TODO: check locks
 
         // остановим клиентов
         ServerV3::inst->connectedClients->terminateAnyDataTransmit();
@@ -176,4 +173,7 @@ public:
 ServerV3* ServerV3::inst = nullptr;
 // TODO:
 // 7. add fix for empty message to stop the client app.
+// 8. send() не обязан отправить всю строку... /// msg = 10000 bytes /// send()  ///  отправлено только 4000 ///
+// 9. 5. Ещё одна архитектурная проблема — TCP-сообщения сейчас не имеют границ () /// придумать способ определить границы сообщений, например \n.
+
 #endif //NBE_CHAT_SERVERB3_H
